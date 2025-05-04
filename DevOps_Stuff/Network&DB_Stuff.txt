@@ -1,0 +1,48 @@
+Network&DB
+
+SSL(Secure Socket layer) and TLS(Transport Layer security)
+- Cryptographic protocols are used to secure communication over networks, especially the Internet
+- TLS is the modern, faster, and secure version of SSL. SSL is not used much now, only in old systems
+- TLS is faster, efficient, and widely supported
+- SSL handshake is vulnerable to attacks, and TLS handshake is more streamlined
+
+TLS handshake:
+- First TCP handshake happens
+  -> System(client) sends sync req to server(SYN)
+  -> Server acknowledges that it responds with its sync(SYN ACK)
+  -> System acknowledges it and the connection is established(ACK)
+- Then, the TLS handshake happens within that TCP session. TLS ensures integrity, authentication, and encryption
+  -> Client Hello: Client sends supported TLS version, list of encryption algos, a random number (later used for 
+                   key gen)
+  -> Server Hello: Server responds with chosen TLS version, encryption algorithm, server's cert(X.509, by trusted 
+                   CA), and maybe ask for client cert(for mutual auth)
+  -> Certificate validation: Client verifies the cert against a valid CA( checks hostname, validity, digital sign)
+  -> Key exchange: based on the encryption algorithm, both agree on a shared secret key(will be used for symmetric   
+                   encryption afterwards)
+  -> Client Finished: Client sends a message with the newly set up key, saying Finished(proving it has the key)
+  -> Server Finished: Server does the same, secure session is established
+- Then, they use symmetric encryption for all comms, which is much faster than public-key crypto
+
+# symmetric encryption: Same key is used for encryption and decryption, both parties must share the key before 
+                        hand, key distribution is tricky(both should keep it safe) but this is fast, efficient,
+                        yields low computational costs, ideal for large amounts of data.
+                        Examples: AES(Advanced Encryption standard)-widely used) chacha20(modern alternate for
+                                  AES)
+
+High availability for databases:
+- Clustering: A Group of DB servers acting as one, with auto failover, and load balancing
+- Replication: Copy data to multiple servers(one master + replicas)
+- Failover mechanism: to switch to the standby DB if the Primary fails
+- Load Balancing( distributing traffic) and Backups disaster recovery: Regular Backups + recovery plans to handle data loss
+- Cloud-native services: AWS RDS Multi-AZ deployment
+
+DB consistency:
+- A transaction must bring the DB from one consistent state to another
+- Integrity of data is preserved(valid and accurate)
+- example: 
+  If a rule says: "Every order must have a valid customer ID"
+  Then:
+    Before a transaction: valid customer → valid order
+    After the transaction: still valid
+    If something breaks this rule, the database is inconsistent
+

@@ -1,0 +1,44 @@
+Git & Linux:
+
+##Change onwer of a file: chmod <username> <file>
+e.g: chmod ubuntu /var/sys/org/script.sh
+ls -ltr: shows that script.sh has a new owner ubuntu
+
+##crontab -l: to see cronjobs that are running
+##crontab -e: to edit a cronjob
+
+##alias: to shorten cmds
+e.g: alias ll='ls -lah'
+
+ls -lh: human readable form
+
+In Linux, the -v flag often means "verbose", i.e.,
+Show detailed output of what the command is doing.
+
+##tcp(Transmission Control Protocol): for more secure, reliable communication with error-checking and retransmitting lost data. Slower transmission.
+e.g, email, web browsing, file transfer
+## UDP (User Datagram Protocol): for faster, connectionless transmission, loss is acceptable
+e.g: video streaming, gaming 
+
+##ifconfig(or ipconfig on Windows): show network config, IP config, MAC addresses, and network config details
+
+##revert a git commit:
+git log: get the commit hash of the commit you want to revert
+Then do: git revert <commit-hash>
+then do: git push origin <branch-name>
+
+
+xargs- It takes input (usually a list) and passes it as arguments to another command.
+
+ls *.txt | xargs rm
+This means:
+
+ls *.txt: lists all .txt files
+
+xargs rm: passes those file names as arguments to rm, like:
+
+rm file1.txt file2.txt file3.txt
+
+branch protection rules in settings => setup in evry org - many options like review pull req before merge, req signed commits etc
+
+commit a specific commit to the branch then use git cherry pick <commit id>

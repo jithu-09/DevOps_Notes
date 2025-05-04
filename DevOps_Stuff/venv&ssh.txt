@@ -1,0 +1,43 @@
+virtual env fix
+
+RUN apt-get update && \
+    apt-get install -y python3 python3-venv && \
+    python3 -m venv /venv && \
+    /venv/bin/pip install -r requirements.txt && \
+    cd devops
+
+ssh process
+
+ssh-keygen -t rsa -b 4096 -f ~/.ssh/Devopskey.pem
+ls -l ~/.ssh/Devopskey.pem ~/.ssh/Devopskey.pem.pub
+chmod 600 ~/.ssh/Devopskey.pem
+chmod 644 ~/.ssh/Devopskey.pem.pub
+ssh-copy-id -i ~/.ssh/Devopskey.pub -o IdentityFile=~/.ssh/Devopskey ubuntu@16.171.136.69: add public key
+eval "$(ssh-agent -s)"   # Start the ssh-agent in the background
+ssh-add ~/.ssh/Devopskey.pem # Add your private key
+
+public key denied error- for password less auth
+ssh into the instance: ssh -i ~/Devopskey.pem ubuntu@16.171.136.69
+
+cat ~/.ssh/Devopskey.pub: copy this
+nano ~/.ssh/authorized_keys: paste this key her in one line: ctl+o  then enter then ctl+X
+or 
+cat ~/.ssh/Devopskey.pub >> ~/.ssh/authorized_keys
+
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/authorized_keys
+
+exit and then try ssh ubuntu@ip add, it will work for ubuntu machina, for amazon Linux use ssh ec2-user@ip
+
+if not working delete the keys and ssh and start again
+rm ~/.ssh/Devopskey.pem ~/.ssh/Devopskey.pem.pub
+rm -rf ~/.ssh
+
+password auth:
+login to the instance
+Go to the file /etc/ssh/sshd_config.d/60-cloudimg-settings.conf
+Update PasswordAuthentication yes
+Restart SSH -> sudo systemctl restart ssh
+
+it will ask for new password, remember that
+login again it will ask password

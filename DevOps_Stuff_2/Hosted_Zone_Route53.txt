@@ -1,0 +1,37 @@
+us: a812c1cd432e24d559287ffe7fced338-1313704944.us-west-1.elb.amazonaws.com
+eu: a94e4e758564747408f9558a4688bf2d-664392977.eu-west-1.elb.amazonaws.com
+
+Yes, if you have a hosted zone set up in Route 53, you should use the domain name associated with that hosted zone to access your application.
+
+Here’s how to approach it:
+
+1. Confirm Your Hosted Zone Domain Name:
+If you have created a hosted zone in Route 53, it will be associated with a domain name (e.g., example.com or myapp.com). You should use that domain to access your application.
+
+For example, if your hosted zone is named example.com, then the domain name you should use to access your app would be:
+http://example.com
+
+
+2. Check Alias Records:
+Ensure that you have created alias records (such as A or CNAME) in the hosted zone that point to the load balancer or service endpoint of your EKS clusters. These alias records should be configured to direct traffic from your domain (e.g., example.com) to the correct load balancer in AWS.
+
+If your load balancer has a DNS name like a94e4e758564747408f9558a4688bf2d-664392977.eu-west-1.elb.amazonaws.com, your alias record in Route 53 should point to this.
+3. Access Your Application:
+Once your alias records are in place and propagated, you can use your domain to access your application:
+
+Open a web browser and enter the domain name you’ve configured (e.g., example.com or whatever domain your hosted zone uses).
+
+If everything is correctly set up, the traffic will be routed to the correct EKS cluster based on the routing policy you configured (e.g., latency-based or geolocation-based).
+
+4. If Using Subdomains:
+If you’re using subdomains (e.g., us.example.com for US traffic and eu.example.com for EU traffic), ensure that:
+
+The corresponding subdomain alias records are created in your hosted zone.
+Each subdomain points to the appropriate load balancer in the region (e.g., US or EU).
+5. DNS Propagation:
+It can take some time (usually up to 48 hours) for DNS changes to fully propagate. During this time, you might not be able to access the application immediately.
+
+In summary:
+Yes, use the domain name associated with your hosted zone in Route 53 to access your application.
+Ensure your alias records in Route 53 point to the correct load balancer or service endpoint in your EKS clusters.
+After setting this up, you can directly access your application via the domain name you've configured in Route 53.

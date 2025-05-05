@@ -1,0 +1,31 @@
+Outline your practical Python software engineering experience and level of competence *
+
+My practical experience in Python pertains mostly to developing automation scripts, integrating tools in cloud environments along with developing standalone applications.
+AWS Automation: I built and maintained a solution called AWS-Cleanup, which automates AWS resource management (such as EC2, VPCs, and EKS clusters) to help users stay within Free Tier limits. This project involved creating Python scripts integrated with GitHub, Google Apps Script, and Gmail for notifications and automated execution.
+Scripting and Automation: I have developed Python scripts for task automation, configuration management, and cloud orchestration. These scripts are often integrated into DevOps workflows, leveraging platforms like AWS and tools like Terraform.
+Collaboration with DevOps Tools: While working on projects related to DevOps and cloud technologies (e.g., AWS, Kubernetes, Docker), I’ve used Python to enhance automation processes, streamline deployments, and reduce manual intervention in the pipeline.
+My level of competence in Python is intermediate. I’m comfortable with object-oriented programming, working with libraries like boto3 for AWS interaction, and integrating Python with other technologies. I continue to learn and expand my knowledge by building more complex automation tools and exploring advanced Python features to improve my efficiency in cloud and DevOps workflows.
+
+
+Outline your practical knowledge and level of competence in Ubuntu, Linux Kernel, Linux Networking and Linux Storage 
+
+My practical experience working with Ubuntu and Linux environments is relevant mostly in the context of cloud technologies and DevOps.
+
+Ubuntu: I frequently use Ubuntu in the command-line interface (CLI) for development and automation tasks. My experience includes setting up and managing various environments, including Docker, Kubernetes, and Minikube within Ubuntu. I’ve also worked on configuring and troubleshooting tools such as Kubeshark and OpenShift on Ubuntu-based systems.
+
+Linux Kernel: While I am not extensively involved in kernel development, I’ve interacted with the Linux Kernel through tasks like Docker networking and working with kernel parameters to fine-tune performance in cloud environments. Additionally, I’ve gained exposure to understanding kernel logs and troubleshooting issues that may arise in cloud-native applications running on Linux.
+
+Linux Networking: I have hands-on experience configuring and troubleshooting Linux networking in cloud environments. I’ve set up and configured Docker networks, integrated Minikube for local Kubernetes clusters, and worked with VPC networking in AWS. My work also involves creating and managing network configurations in cloud-based environments, ensuring proper routing, and managing firewalls and security groups.
+
+Linux Storage: I have dealt with Linux storage concepts in the context of cloud services and containerization. I’ve worked with mounting volumes, configuring persistent storage for Docker containers and Kubernetes pods, and integrating storage solutions in AWS, such as EBS and S3. Additionally, I am familiar with managing file systems, configuring partitions, and ensuring the efficient storage of logs and data for cloud-based services.
+
+
+Outline your practical experience with Kubernetes, OpenStack or Ceph *
+
+I have practical experience working with Kubernetes in the context of cloud-native applications and DevOps workflows.
+
+Kubernetes: I’ve worked extensively with Kubernetes to manage containerized applications, particularly in a cloud environment. My experience includes setting up Minikube for local Kubernetes clusters, configuring Kubernetes resources like pods, services, deployments, and namespaces. I’ve also handled Kubernetes networking and managed clusters in a variety of environments to ensure smooth deployment and scaling of applications.
+
+Ceph and OpenStack: While I haven’t worked directly with Ceph or OpenStack in production, I am familiar with the concepts of these systems in the context of distributed storage and cloud orchestration. I’ve encountered these technologies through learning and research as part of the broader DevOps and cloud infrastructure landscape.
+
+My level of competence with Kubernetes is intermediate, and I continue to deepen my knowledge through hands-on experience with both Kubernetes. I am always eager to learn and explore new tools in the container orchestration and cloud-native space.

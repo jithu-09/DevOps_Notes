@@ -1,0 +1,136 @@
+Passcg1234@
+
+ansible-config mang tool, makes sys admin life easy
+-os,patch, app deps installation and updation alomg with maintainace
+
+- works in pull method
+agent only on ctrl node(Linux os preferred) no need on magd nodes(only oy required)
+
+- internally py, converts yaml to py and executes req py ,modules for the tasks
+
+managed nodes ips, users are stored in inventory file(inventory.ini, can be anywhere in the dir)
+
+ansible collections- modules, roles of tech and svcs like aws that ansible uses to interact with their apis to perform certain tasks
+can be used for marketplace or create in ansible galaxy
+
+playbook collection of tasks, can run adhoc also for smaller tasks.
+
+ansible vault- for storing sensitive info, out of the box, no addn installation req, ansible-vault is the cmd
+
+policy as code- for security and compliance, progamtically attach and updte policies of targestted resources.
+
+order of execution- t2 is executed only if t1 is good in all nodes, failure excemption to overcome this, failed when: give conds which can ignored, ignore_errors:yes
+
+
+aws- amazon web services- cost effective, no or min maintainance overhead
+provisiong and delivering IT services over internet with min maintaenance overhead
+
+IAM- identity and acc mgmt. - tell who(people and apps) can access(perm ie, policies) what(aws resources)
+default-deny
+
+create roles, attach policies which a user can assume to do some tasks or interact with aws
+can create groups, add users, attach policies collectively(verion, statement, effect, allow, resource)
+
+ec2-elactic compute cloud- vm service - easy to use, pay as you go, for multiple use cases: general computational, memory, acc computing, storage
+you can ssh into them to work remotely, using key pair, pvt key in instance, public key with user
+
+vpc- virtual private cloud- dedicated ip range(cdr block), consists of subnets-private and public 
+igw for pub, nat for pvt(masks the instances ip in pvt subnet, shares it's public ip to the internet, present in public subnet
+
+user on internet-> igw -> public subnet -? elastic load balancer -> nat gateway -> pvt subnet -> ec2 with the app -> appN
+
+each pvt subnet has a route table, same for all pub subnets, igw and nat gateways are associated to the subnets
+RT-> helps in sending req received to  the destination
+
+dns- domain name service - self managed: domain name purchase+hosting service + maintaing dns records
+all this managed- route53 in aws
+
+dns resolves domain name to app server ip address
+
+dns records maps domain name to ip address
+
+vpc peering- adding vpc endpoint of one vpc to another, enables comms btw them
+
+sg(stateful) firewall at instance level, nacl at subnet(stateless)- sets inbound and outbound access rules
+
+bastian host- ssh into this intance(pub subnet) to ssh into instanc ein ovt subnet
+
+2 tier -client server
+
+3 tier- presentation, app,  data- create vpc, subnets for 3 tiers, elb in pub subnet)
+
+nat-ntwk add translation
+
+instances in sam evpc, comms with pvt ip
+
+
+AWS S3- Simple storage service
+
+for secure storage- high avail, versioning(multiple versions of the bucket), security, durable(99.99999999999%), reliable, cost eff, high perf
+can store anything(img, vids, text,files etc) as objects- max 5tb per object
+monitoring and loggin can be enabled to track sus activity(disabled by default)
+Server side encryption for data at rest - SSE-kms, Dual layer SSE-KMS
+encryption for data in transit- ssl/tls certs
+bucket polivies, access  ctrl lists, data immutability, obj lock
+
+s3 outposts-costly, std-fastest, gla deep arch- slowest and cheapest retrieval
+static hosting- disable block all public access, delete policies and add new ones to allow access to objs in bucket
+s3 events and trigger- plan actions based on some events
+s3 batch ops- on large scale datasets to run batch ops like deleting, tagging objs in buckets
+unique name for each bucket, globally accessible- http.//s3.amazon.aws.com:<bucket name>
+asynchronous repliucation(rep with a dlay, not immediately updated but consistence over time)- cross reg rep-for disatory recovery and backup
+same reg rep- data resilence and low latency
+used for storage, backup, restore, data source etc
+
+AWS CFT- cloud formation templates
+To create and manage infra in aws using IAC principles
+write yaml/json -> converted to api calls understable by AWS
+stack- import yaml file of the infra to be provisioned to aws
+structe- version, descrition, metadata, rules, mapping, conds, rsiurces, outputs
+declarative, versioned, supports drift detection
+
+AWs code pipeline- to implement CI: integrate tools and processes to build app and CD: to deploy app to user or spec platform
+CI/CD- automate s/w delivery prcesses from build to deploy
+event driven, based to push or pull actucvties to vcs- code commit(alt for GitHub, only for aws not comp with others), costly
+webhook-http callback mechn- allows one appn to send realtime data(payload to pre config url) to other appn
+code build for CI and code deploy for CD- if code deploy deploys app to ec2- iam role to be given to ec2 to access deploy, deploy agent to be installed I ec2, yaml file in root of repo
+
+unit test, code quality, automatic tests, deployment
+Jenkins better alternative- declarative, open source9free of cost, but not scalable(master node always present, more no of nodes at all time- GitHub actions better alternative
+
+code checkout, code quality scan, build image, img scan, image push, upate k8 repo, upate helm charts(package maager used to manage, install k8s appn), argocd for CD, dploy to k8 cluster
+
+cloud watch- monitor everything(activities, processes) in your cloud(infra and apps)- logging, alerting, reporting, alarams, real life metrics, cpu util, mem util etc7
+custom metrics avail, logs to see everything that happened, 1036 metrics enabled by default, cost opt and scal - avail but not default but by integration with others svcs
+
+
+AWS lambda- serverless, compute purpose- evrythung (prov,MANG, scal eup and dn, tera down)by aws
+ip add and loc not visible- if you need endpt to lambda fun, enable in adv setting
+provides security compliance, through alerts and config to take action
+cost eff. a role is created by deafdult with func, can modify it, default exec time: 3 sec, imp parameter for billing
+
+Cloudfront- aws sol for Cloyud del network
+req in interet goes through multiple hops to reach destintion and send back req_> hops proportional to latency
+caches data in nearest edge locations to users-> latency decreases,req need not access end point but cdn. origin access identity to be enables in bucket policy
+s3 static hosting- costly,  not secure, latency -> soln cloudfront 
+
+ecr- docker hub for aws- store, mange, deploy images securely, pvt by default, iam based access can be public, scalable, lifecycle policies(auto cleanup of unused images to dec cost inc efficiency, retaine recent vers onnly, exipre untagges imgs)-eks,ecs, lambda integration
+
+
+
+ecs-el cont svc- cont orch svc like k8s(inferior to k8s)- deploy, manage scal cont appn- higly scalabke, reliuable, secure
+has task def(like pods)(task def role- makes api calls o other svc on your behalf)-> run these to get tasks which give containers
+pod- tells how to run a container and the requs to ru n it
+
+aws system manager(less sensitive info) + aws secrets manager(more sens info, cotly svc)
+
+load bal- to distribute traffic to your resources efficiently
+
+req flow- app layer(decide which protocol to tranfer reqy), pres layer, session layer(session info- what req, who sent etc), transport layer(divided to small chunks to decrease latency), ntwk layer, data link layer and phyu layer and back in the same process 
+
+traffic rotuing in app layer- app lb- slow, costly, adv routing tech(host, path, domains), ssl offloading ie secure transfer for plain req also, highly secure
+at twk layer- ntwk lb- low latency high transger speed, no http transfer, tcp and udp oackets rotuing, sticky session avail
+
+gateway lb- for req from vpn, vm, firewall etc, thers cant handle them, sent in most secure way
+
+cloud mig strats- rehost,n repurpose, repurchase etc- basic steps prep, plan(1 time steps), migrate, monitor, optimize(cont steps)

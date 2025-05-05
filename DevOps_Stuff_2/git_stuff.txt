@@ -1,0 +1,71 @@
+push to git hub from terminal
+
+git init
+
+git add <file name>
+
+git commit -m "Add Dockerfile"
+
+connect to repo: git remote add origin https://github.com/yourusername/your-repo.git
+
+if remote existes error:
+git remote remove origin
+git remote add origin https://github.com/jithu-09(username)/Jenkins-Sonarqube-Docker(repo-name).git
+
+git push -u origin main
+
+remote already present:
+git push origin main
+
+src refspec main does not match any typically occurs because your Git repository is still on the default branch, which is named master instead of main.
+
+Push to the master Branch instead of main:
+
+git push -u origin master
+
+If you want your default branch to be main, you can rename it:
+
+git branch -M main
+git push -u origin main
+
+Pull the Latest Changes from the remote main branch and merge them with your local main branch:
+
+This will combine both the remote and local changes using a merge commit:
+git config pull.rebase false
+git pull
+
+This command will rebase your changes on top of the latest commits from the remote main branch, which should help avoid merge conflicts.
+
+to see recent commits:
+git log --oneline
+
+
+for 403 error, permission denied:
+git remote set-url origin https://<TOKEN>@github.com/jithu-09/Qr-code-generator.git
+git remote set-url origin https://<toekn>@github.com/zorroborrolol/Jenkins-cicd.git
+
+git remote -v
+git remote remove origin
+git remote add origin https://<toekn>@github.com/jithu-09/Linux_stuff.git
+
+
+steps to set remote GitHub repo for push and pull:
+
+git remote -v : check remote
+git remote remove origin: remove existing origin
+git remote add origin https://<toekn>@github.com/jithu-09/Linux_stuff.git
+add new remote with GitHub token
+git branch --set-upstream-to=origin/main main: set upstream branch, required
+git pull origin main: pull changes
+resolve conflicts if any:
+git config pull.rebase true
+git pull origin main
+Push to repo:
+git push origin main
+
+
+
+
+
+to remove file from commiting:
+git rm --cached <file_or_directory>

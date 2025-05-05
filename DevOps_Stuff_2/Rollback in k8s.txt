@@ -1,0 +1,22 @@
+Rollback in k8s: 
+
+1.kubectl rollout status deployment/my-app: check status
+
+2.kubectl rollout history deployment/my-app: check history
+say it's like this:
+deployments "my-app"
+REVISION  CHANGE-CAUSE
+1         kubectl apply --filename=my-app-v1.yaml
+2         kubectl apply --filename=my-app-v2.yaml
+
+3.kubectl rollout undo deployment/my-app: rollback to prev version
+
+or to a specific version: kubectl rollout undo deployment/my-app --to-revision=1
+
+4.kubectl rollout status deployment/my-app: verify rollback status
+
+# kubectl annotate deployment my-app kubernetes.io/change-cause="Updated image to version 2"
+# Monitor pods before and after rollout to check for issues
+
+# study about various error you can face in k8s
+- crashloopbackoff: out of resources to build it, or image not available, out of memory etc.

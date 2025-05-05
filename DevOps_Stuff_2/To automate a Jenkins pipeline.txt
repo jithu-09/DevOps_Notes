@@ -1,0 +1,49 @@
+To automate a Jenkins pipeline execution based on changes made to a GitHub repository, you can set up webhooks in GitHub and configure polling or triggers in Jenkins. Below are the detailed steps with actions for both GitHub and Jenkins:
+
+Step 1: Configure Webhook in GitHub
+
+Go to your GitHub repository.
+	Navigate to Settings > Webhooks > Add webhook.
+	Fill in the fields:
+	-Payload URL: Use http://<your-jenkins-url>/github-webhook/ (replace <your-jenkins-url> with your Jenkins server URL).
+	-Content type: Select application/json.
+	-Secret: Optionally, set a secret token for additional security.
+Under Which events would you like to trigger this webhook?:
+	-Select Just the push event to trigger builds on code changes.
+	-Click Add webhook.
+
+Step 2: Install Required Plugins in Jenkins
+
+In Jenkins, go to Manage Jenkins > Plugin Manager.
+	-Search for and install:
+		GitHub Integration Plugin
+		Git Plugin
+		GitHub Hook Trigger Plugin (if not already installed).
+
+Step 3: Set Up Jenkins Pipeline
+
+	-Freestyle Job
+	-Create a new Freestyle Job:
+	-Click New Item, select Freestyle project, and name it.
+	-Configure Source Code Management:
+	-Under Source Code Management, choose Git.
+	-Add your repository URL.
+	-Provide credentials if the repo is private.
+	-Add Build Trigger:
+	-Check GitHub hook trigger for GITScm polling.
+	-Add Build Steps:
+	-Include the necessary build steps, such as executing a shell script or building a Docker container.
+	-Pipeline Job
+	-Create a new Pipeline Job:
+	-Click New Item, select Pipeline, and name it.
+	-Configure Source Code Management:
+	-Under Pipeline > Definition, choose Pipeline script from SCM.
+	-Select Git and provide your repository URL.
+	-Specify Branch:
+	-In Branches to build, define the branch to monitor (e.g., main).
+	-Add Build Trigger:
+	-Check GitHub hook trigger for GITScm polling.
+
+Step 4: Test the Setup
+	-Push changes to your GitHub repository.
+	-Observe if Jenkins triggers a build automatically.

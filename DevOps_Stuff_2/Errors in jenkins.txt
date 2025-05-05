@@ -1,0 +1,29 @@
+Volumes:
+tmpfs refers to temporary file storage in RAM, which is not persistent and does not correspond to your EBS volume.
+use <lsblk> to get the list all block devices and their mount points, which will help you identify the newly mounted EBS volume.
+
+Errors in Jenkins:
+Java version mismatch with build tool(like maven)
+
+ERROR: Error fetching remote repo 'origin'
+ERROR: Maximum checkout retry attempts reached, aborting
+
+Insufficient permission for adding an object to repository database .git/objects suggests that the Jenkins process does not have the necessary permissions to write to the .git/objects directory 
+-> Sometimes, cleaning up the workspace can resolve permission issues. Retry job
+
+Issue with untracked files -> you need to add the untracked files to the commit or ignore them if they are not necessary for the commit. 
+ex: 
+git add java-maven-sonar-argocd-helm-k8s/spring-boot-app/target/
+git commit -m "Update deployment image to version 3"
+
+trigger Jenkins build:
+webhooks
+poll scm(cron job)
+from UI
+API calls
+
+GitLab vs Jenkins in cron tasks: GitLab runs irresp of new code commit at the time the cron job is configed to execute whereas Jenkins only triggers a build only if there's a new commit at the time of execution
+
+terraform dependencies:
+implicit, based on resource config, terraform can pick it up
+explicit, using "depends-on"

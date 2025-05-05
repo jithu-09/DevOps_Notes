@@ -1,0 +1,32 @@
+Linux cmds
+
+echo – Output text or variables to the terminal (e.g., echo "Hello, Linux!")
+whoami – Display the current logged-in user's username
+id – Get detailed information about the current user, such as UID, GID, and groups
+htop – A real-time system monitor/dashboard showing resource usage and processes
+clear – Clear the terminal screen for better visibility
+~ (Home Directory Symbol) – Shortcut to your home directory (e.g., /home/username)
+pwd – Print the current working directory
+cd – Change directories (e.g., cd /path/to/directory)
+ls – List files and directories in the current directory
+touch – Create an empty file (e.g., touch newfile.txt)
+mkdir – Make a new directory (e.g., mkdir new_folder)
+cp -r <source> <destn> – Copy directories and their contents recursively
+mv <source> <destination> – Move or rename files or directories
+rm & rmdir – Remove files (rm file.txt) and remove empty directories (rmdir dir)
+difference between rmdir and rm -rf:
+rmdir: Deletes empty directories.
+rm -rf: Deletes files and non-empty directories (use cautiously as it’s irreversible).
+cat – Display the contents of a file in the terminal (e.g., cat file.txt)
+head – Display the first few lines of a file (default: 10 lines)
+tail – Display the last few lines of a file (default: 10 lines)
+diff – Compare two files line by line and show differences
+diff -r – Recursively compare directories
+chown – Change file or directory ownership (e.g., chown user:group file.txt)
+chmod – Change file or directory permissions (e.g., chmod 755 file.txt)
+useradd – Add a new user to the system (e.g., useradd newuser)
+passwd – Change the password for a user (e.g., passwd user)
+usermod – Modify user details, like changing the home directory or shell
+userdel – Delete a user from the system (e.g., userdel username)
+
+💡 Pro Tip: Always be cautious when using commands like rm -rf, as they can permanently delete data.

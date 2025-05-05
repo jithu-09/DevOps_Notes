@@ -1,0 +1,6 @@
+Steps to push image created to docker hub
+
+docker build -t gabrieldeoliveiraest/projetofinal2_web:latest -f Dockerfile .
+docker login -u "gabrieldeoliveiraest" -p "password" docker.io
+docker tag projetofinal2_web gabrieldeoliveiraest/projetofinal2_web:version1
+docker push gabrieldeoliveiraest/projetofinal2_web:version1

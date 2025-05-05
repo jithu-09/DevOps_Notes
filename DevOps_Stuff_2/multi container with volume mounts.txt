@@ -1,0 +1,28 @@
+multi container with volume mounts pod
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: volume-share-devops  # Name of the Pod
+
+spec:
+  restartPolicy: Never  # Containers should not be restarted automatically.
+
+  volumes:
+    - name: volume-share  # Defines an emptyDir volume for sharing data.
+      emptyDir: {}
+
+  containers:
+    - name: volume-container-devops-1  # First container
+      image: centos:latest
+      volumeMounts:
+        - name: volume-share
+          mountPath: /tmp/media
+      command: ["sleep", "infinity"]  # Keeps the container running
+
+    - name: volume-container-devops-2  # Second container
+      image: centos:latest
+      volumeMounts:
+        - name: volume-share
+          mountPath: /tmp/demo
+      command: ["sleep", "infinity"]  # Keeps the container running

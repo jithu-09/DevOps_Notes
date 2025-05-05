@@ -1,0 +1,24 @@
+Devops
+dev, test, ops, security: involves mindset, processes, tools that enhance speed and quality of delivery, automate repeated tasks for increased speed and efficiency.
+
+teams practice DevOps to increase innovation and agility, improve quality, release faster, and lower cost. DevOps improves delivery efficiency and predictability of the application and services.
+
+Traditional ways-slow and inefficient-causes bottlenecks(Performance bottlenecks are factors that limit the capacity or efficiency of a system or a process. can occur at any stage.) and delays - 
+#siloed:isolated from other(processes are siloed in traditional ways)
+
+monolithic apps- deployed as a unit, making changes very hard, tightly coupled functionality	
+
+plan, code, build, test, release, deploy, operate, monitor
+
+Benefits: Agility, improved collaborations, reliability, scalability, security, improved efficiency of delivery
+
+continous deployment-continous delivery + automated production deployment
+
+aws services for devops(exs only):
+devs-aws cloud 9, cloud development kits(CDKs), aws tools and sdks: write run and debug code
+code- aws codecommit: store and version control your code
+build- aws codebuild- complie code, run tests and build release packages
+test- aws codebuild+3rd party tools
+deploy- aws codedeploy: automate deployment to various compute services
+monitor- aws cloudwatch, aws xray: monitor requests made to applications, track metrics, visualize data, identify optimization opportunities
+for code, build, test, deploy: aws codepipeline: automate release pipeline.continous delivery service. enables you to model, visualize, and automate the steps required to release your software. 

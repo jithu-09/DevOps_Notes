@@ -1,0 +1,62 @@
+FROM ubuntu
+
+WORKDIR /app
+
+COPY requirements.txt /app
+COPY devops /app
+
+RUN apt-get update && \
+    apt-get install -y python3 python3-pip && \
+    pip install -r requirements.txt && \
+    cd devops
+
+ENTRYPOINT ["python3"]
+CMD ["manage.py", "runserver", "0.0.0.0:8000"]
+
+error: externally managed environment
+
+sol:
+
+FROM ubuntu:20.04
+
+# Set the working directory
+WORKDIR /app
+
+# Copy necessary files
+COPY requirements.txt /app
+COPY devops /app/devops
+
+# Install Python and pip
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip && \
+    apt-get clean
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Set the entry point and command
+ENTRYPOINT ["python3"]
+CMD ["devops/manage.py", "runserver", "0.0.0.0:8000"]
+
+
+OR
+
+FROM ubuntu
+
+WORKDIR /app
+
+COPY requirements.txt /app
+COPY devops /app
+
+ENV PIP_BREAK_SYSTEM_PACKAGES 1 //MVP LINE: this is legacy way[ENV KEY VALUE]
+// New way: ENV PIP_BREAK_SYSTEM_PACKAGES=1[ENV KEY=VALUE]
+
+RUN apt-get update && \
+    apt-get install -y python3 python3-pip && \
+    pip install -r requirements.txt && \
+    cd devops
+
+ENTRYPOINT ["python3"]
+CMD ["manage.py", "runserver", "0.0.0.0:8000"]
+

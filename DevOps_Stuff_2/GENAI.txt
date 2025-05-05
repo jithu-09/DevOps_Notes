@@ -1,0 +1,13 @@
+<<<<<GENAI>>>>><<<<<GENAI>>>>><<<<<GENAI>>>>><<<<<GENAI>>>>><<<<<GENAI>>>>><<<<<GENAI>>>>><<<<<GENAI>>>><<<<GENAI>>>>
+
+- AI: Aims at creating intelligent machines, achieved through ML
+- ML: Machines make decisions based on data, types: supervised(label data), unsupervised(un-labeled data), reinforcement(feedback given for the output generated)
+   -> training done rhrough models
+- AI splits text into small units: tokens(word level, subword level, character tokenization)
+- Embedding: numerical(vector) representation of real-world objs so that AI-ML systems can understand complex knowledge domains likes we do. words -> tokens -> embeddings -> model processes these embeddings
+- ChatGPT: large data sets + web crawl -> trains neural network based on transformer arch -> supervised + reinforcment learning -> gives Generative pre-trained transformer(GPT model) - Large language model(LLM)
+- Dall-E: Same as chat GPT, in training phase- unspervised, in fine tuning phase- supervised, data set- large volumnes of images with captions. For image generation.
+- github copilot: same stuff, uses codex model(descendant of gpt-3 model)
+-Local GPT: give data -> vector embeddings created (through ingestion) -> stored in vector store => can respond to quries pased using this
+
+OLAMA, docker model runner

@@ -1,0 +1,14 @@
+install aws cli:
+
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+
+
+eksctl create iamserviceaccount --cluster=demo-cluster-1 --namespace=kube-system --name=aws-load-balancer-controller --role-name AmazonEKSLoadBalancerControllerRole --attach-policy-arn=arn:aws:iam::539039282224:policy/AWSLoadBalancerControllerIAMPolicy --approve
+
+eksctl create fargateprofile \
+    --cluster demo-cluster-1 \
+    --region us-east-1 \
+    --name alb-sample-app \
+    --namespace game-2048

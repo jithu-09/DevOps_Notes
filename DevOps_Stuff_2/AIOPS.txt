@@ -1,0 +1,62 @@
+<<<<<AIOPS>>>>><<<<<AIOPS>>>>><<<<<AIOPS>>>>><<<<<AIOPS>>>>><<<<<AIOPS>>>>><<<<<AIOPS>>>>><<<<<AIOPS>>>><<<<AIOPS>>>>
+- AI for IT operations(mainly in observability), data analysis, patterns(anomaly - Isolation Forest ML algo is best for this detection) in data, prevent events through prediction(AI agents)- Dynatrace, datadog, Grafana cloud
+- Gen AI usage: AI assisted devops(create tf, py, docker, k8s files)
+
+start from:
+AI chatbots(chatgpt, deepseek, llama,claude)
+then:
+AI Agents(github copilot workspace, bolt.com) - takes your instruction, tells you what needs to be done(chatbots and assts scope stops here), can also execute the task on your behalf.
+then:
+AI assistants(github copilot workspace, cursor.ai. peices fro develops)
+req:
+one prog lang(python) + frameworks(fast api, django)
+
+Primary purpose of Traditional AI: Predictions based on training input
+- Fed with historical data(large volumes).
+- In DevOps: Predict future events and patterns related to observability incident management based on current data
+  i.e, AIOPS. Log Analysis. AWS Auto Scaling.
+-Limitations:
+   Works only on pre-trained scenarios.
+   Cannot generate insights beyond structured input data.
+
+Primary purpose of GEN AI: Generate content(text, images, videos, audios etc)
+- Fed with large volumes of text, audio, video, image data.
+- Generate new text: Large language models(LLMs), Text based Gen AI models. Ex: ChatGPT, LLAMA, Gemini, Claude
+- In DevOps: Generate new manifest files for k8s based on large volumes of manifests data, using LLMs.
+  Exs: LLAMA:407B(trained on 407 billion parameters)
+
+How are they trained on large vols of data?
+- Using super computers(have gpus and tpus), use parallel computing- 1000s of processes run in parallel
+- LLMs trained using 100s of super computers
+- After training, they respond from their memory, doesn't go back to source.
+- Training sources- Common Crawl (massive dataset of web pages collected by a non-profit organization that regularly crawls the internet). <uses>- scale, variety, public availability, <cons>-quality control, bias & misinfo, legal & ethical issues.
+- Local LLMs(pros - security, cons - Infra maintainance if you want to scale it) and Hosted LLMs(Pros - easier to use, cons- Security and privacy, cost(tokens based))
+- Ollama: has all the models(like docker hub), needed to talk with LLM in local setup.
+
+
+Prompt Engineering:
+- Means to communicate with LLMs: Prompts, Output proportional to quality if prompt. Used to enhance prompts to get   desired outputs from AI models. Helps in cost optimization in orgs.
+- Types of prompting: Direct or zero shot(basic), few shot(popular and rec), multishot, Chain of Thoughts(COT)
+- Tokens proportional to API call cost. ex 100 words - 60-80 tokens(in Gemini), better prompt implies lesser tokens utilized
+- Zero Shot: Direct prompt without any example(works with popular or familiar use cases)
+- Few shot: Prompt + example(recommended) as LLMs may not have the context of your prompt.
+- Multi shot: prompt + more examples, context
+- COT: Enhances performance of LLMs, compels them to use their reasoning caps
+- Follow this: Provide <<Context + Instructions + Example + Output format>>
+
+modern day setup for observability using AIOPS(desired):
+traditional AI(for predictions) + AI agent(to respond to the prediction)
+-Not free generally, AIOPS
+
+
+Log Analysis:
+-Proactive approach needed not reactive as alerts and stuff can be configured for known patterns => can miss out on warnings or errors not seen before which can impact the app. ELK stack or using cmd like grep etc or py script used for reactive approach.
+-Proactive approach: Use AI, train it with ML algos to detect anomalies. Isolation Forest is best for this purpose, un-supervised algo, no need of structured data, can identify known and unknown patterns.
+-Typical process:
+ -> Read the log file
+ -> use pandas to serialize the data
+ -> use a for loop to count the log for diff type like info, warn, critical etc
+ -> use if else to take action if count exceeds a limit
+
+MLops- doesn't deal with LLMs but traditional AI(predictions)
+LLMops- openAI, Amazon, Azure - they have build their LLMs

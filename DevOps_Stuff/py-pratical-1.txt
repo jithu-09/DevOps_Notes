@@ -1,0 +1,156 @@
+import sys
+import os
+
+name= sys.argv[1] # get the first argument from the command line
+name2Fine= name.split("_") #
+print(name2Fine[1])
+
+#to run this code
+# 1. Save the code in a file named test.py
+# 2. Open a terminal or command prompt
+# 3. Navigate to the directory where test.py is saved
+# 4. Run the command: python test.py
+# 5. Enter a name when prompted
+# 6. The program will print the second word of the name
+# another way to run this code  
+# 1. Open a terminal or command prompt  
+# 2. Navigate to the directory where test.py is saved
+# 3. Run the command: python -c "import test; test.main()"
+#common string built in functions
+# 1. len() - Returns the length of a string.
+# 2. str() - Converts an object to a string.
+# 3. lower() - Converts a string to lowercase.
+# 4. upper() - Converts a string to uppercase.
+# 5. title() - Converts the first character of each word to uppercase.
+# 6. split() - Splits a string into a list.
+# 7. join() - Joins a list of strings into a single string.
+# 8. replace() - Replaces a substring with another substring.
+# 9. find() - Returns the index of the first occurrence of a substring.
+# 10. count() - Returns the number of occurrences of a substring.
+# examples
+# 1. len()  
+string = "Hello, World!"
+length = len(string)        
+print(length)  # Output: 13
+# 2. str()
+number = 42
+string_number = str(number)         
+print(string_number)  # Output: "42"
+# 3. lower()
+string = "Hello, World!"
+lower_string = string.lower()
+print(lower_string)  # Output: "hello, world!"
+# 4. upper()
+string = "Hello, World!"
+upper_string = string.upper()
+print(upper_string)  # Output: "HELLO, WORLD!"
+# 5. title()
+string = "hello, world!"
+title_string = string.title()
+print(title_string)  # Output: "Hello, World!"
+# 6. split()
+string = "Hello, World!"
+split_string = string.split(", ")
+print(split_string)  # Output: ["Hello", "World!"]
+# 7. join()
+string_list = ["Hello", "World!"]
+joined_string = " ".join(string_list)
+print(joined_string)  # Output: "Hello World!"
+# 8. replace()
+string = "Hello, World!"
+replaced_string = string.replace("World", "Python")
+print(replaced_string)  # Output: "Hello, Python!"
+# 9. find()
+string = "Hello, World!"
+index = string.find("World")
+print(index)  # Output: 7
+# 10. count()
+string = "Hello, World!"
+count = string.count("o")
+print(count)  # Output: 2
+# string slicing
+# 1. string[start:end] - Returns a substring from start index to end index (exclusive).
+
+a=int(input()) # 
+b=int(input()) #
+
+def add(): #def is used to define a function # this will become: def add(a,b)
+    return a+b # return is used to return a value from a function
+# a and b are global variables, they can be accessed from anywhere in the code
+
+def sub():
+    return a-b
+
+def mul():
+    return a*b
+
+def div():
+    return a//b 
+
+#calling the functions
+print("add:" + " " + str(add())) # this can also be as: print("add:", str(add(5,10)))
+print("sub:" + " " + str(sub()))
+print("mul:" + " " + str(mul()))
+print("div:" + " " + str(div()))
+
+# difference between sys.argsv and input()
+# sys.argv is a list in Python, which contains the command-line arguments passed to the script.
+# sys.argv[0] is the name of the script itself.
+# sys.argv[1] is the first argument passed to the script.
+# input() is a built-in function in Python, which allows you to take input from the user.
+# input() will prompt the user for input and wait for the user to enter something.
+# sys.argv is used when you want to pass arguments to the script from the command line.
+# input() is used when you want to take input from the user during the execution of the script.
+
+list1 = [1, 2, 3, 4, 5]
+print(list1[0:3]) # Output: [1, 2, 3]
+
+#tuple vs list
+# 1. Lists are mutable, meaning you can change their content. Tuples are immutable, meaning you cannot change their content.
+#example
+list1 = [1, 2, 3]
+list1[0] = 10
+print(list1)  # Output: [10, 2, 3]
+tuple1 = (1, 2, 3)
+# tuple1[0] = 10  # This will raise a TypeError: 'tuple' object does not support item assignment
+# typle only can be of one data type, lists can be of multiple data types
+# 2. Lists are defined using square brackets [], while tuples are defined using parentheses ().
+
+#remove item in list
+list1 = [1, 2, 3, 4, 5]
+for i in list1: # while list1[i] != 3: print(list1[i])    if list1[i] == 3:
+        del list1[i]
+        print(i)
+        break
+print(list1)  # Output: [1, 2, 4, 5]
+# another way to remove item in list
+list1 = [1, 2, 3, 4, 5]
+# remove() method removes the first occurrence of the specified value
+# If the value is not found, it raises a ValueError.
+# remove() method is used to remove an item from a list by value
+list1.remove(3) # removes the first occurrence of 3
+print(list1)  # Output: [1, 2, 4, 5]
+
+#reference item in tuple
+tuple1 = (1, 2, 3, 4, 5)    
+print(tuple1[0])  # Output: 1
+
+folders = input("Enter the folders: ").split()
+
+for folder in folders:
+    try:
+        files = os.listdir(folder) # enter the folders separated by space
+    except FileNotFoundError:
+        print("===================================")
+        print(f"Folder '{folder}' not found.")
+        continue
+    print("===================================")
+    print("FILES IN FOLDER:", folder)
+    for file in files:
+        if file.endswith(".txt"):
+            print(f"Found text file: {file} in folder: {folder}")
+        else:
+            print(f"Found non-text file: {file} in folder: {folder}")
+
+
+    

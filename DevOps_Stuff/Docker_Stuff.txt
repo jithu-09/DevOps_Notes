@@ -40,3 +40,46 @@ cmd(not fixed) and entrypoint(fixed, cant be mod) can be used to run default Lin
 alpine: lightweight, only req packages present
 from node:12-alpine - alpine image
 from node - pulls latest image
+
+Docker events:
+It streams low-level, real-time event logs from the Docker daemon; not just your container.
+
+Imagine this:
+Your container is restarting in PROD.
+But it works on your machine.
+
+your usual debugging ritual:
+👉 docker logs → nothing
+👉 docker inspect → static
+👉 docker exec → can't connect before it dies
+
+Now try this instead:
+docker events --filter container=<your_container_id>
+
+Output:
+2025-05-04T18:20:01Z container create ...
+2025-05-04T18:20:02Z container start ...
+2025-05-04T18:20:03Z container health_status: unhealthy ...
+2025-05-04T18:20:04Z container kill signal=SIGTERM
+2025-05-04T18:20:04Z container restart
+
+👉And boom.
+Healthcheck failed → container killed → Docker auto-restarted it.
+And your app logs?
+They don’t show that. Because the healthcheck is outside your main process.
+
+Bonus tips:
+- Scope timeframes:
+docker events --since 30m --until "2025-05-04T18:00:00"
+- Want structured output?
+docker events --format '{{json .}}'
+- Need a full system timeline during an outage? Just remove the filter:
+docker events
+
+You should use Grafana, Loki, Prometheus for observability? You can't debug:
+- OOM kills before metrics are scraped
+- Missed volume mounts
+- Broken init containers
+- Sidecars that silently crash and restart
+
+docker events sees it all. In real time.

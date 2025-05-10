@@ -7,7 +7,8 @@ AWS CloudTrail (logs user activity and API calls for auditing, governance, risk 
 aws cloudformation(like terraform, json format, has stacks which can be reused)
 
 maintain different environments like dev stage and prod in AWS:
-->> I maintain Dev, Stage, and Prod environments in AWS by using separate VPCs or accounts, Infrastructure as Code like Terraform, and environment-specific configs through SSM or Secrets Manager. I manage access with IAM, automate deployments through CI/CD pipelines, and ensure monitoring, tagging, and cost tracking are handled separately for each environment.
+->> I maintain Dev, Stage, and Prod environments in AWS by using separate VPCs or accounts, Infrastructure as Code like Terraform,
+and environment-specific configs through SSM or Secrets Manager. I manage access with IAM, automate deployments through CI/CD pipelines, and ensure monitoring, tagging, and cost tracking are handled separately for each environment.
 
 Alternatives to a Bastion Host for connecting to private subnet are:
 ->>Systems Manager (SSM) Session Manager - No need to open SSH ports (port 22) or maintain bastion servers. Needs
@@ -26,7 +27,7 @@ Auto-scaling instances fail after launch during a traffic surge. how to handle?
 ->> CloudWatch to check system metrics like CPU, memory
 ->> Review instance logs if you can SSH into one
 ###Cloudwatch, by default, doesn't collect application logs; it only collects system metrics.
--> for that, you need to install the CloudWatch agent on the instance, specify which logs to watch( agent config file, which CloudWatch log group to send to, and how frequently.
+-> for that, you need to install the CloudWatch agent on the instance, specify which logs to watch( agent config file, which CloudWatch log group(A Log Group(container, organizes log streams, can search by common name, easy to monitor, search and analyze) is like a folder for related logs, making it easier to manage and analyze them in CloudWatch.) to send to, and how frequently.
 
 
 Different typesof volumes(ebs) in aws:
@@ -44,7 +45,7 @@ Data encryption in AWS:
 ###Client-side encryption happens before sending data to AWS, while server-side encryption happens after AWS receives the data.
 
 ✅ Client-side = More control, more responsibility, manage keys  - On the client's machine before data is sent to AWS, encrypted when being uploaded(transit)
-✅ Server-side = Easier, integrated into AWS services, AWS manages keys or optionally client can - On the AWS server after AWS receives the data, data is plain during upload(transist) encryptionat AWS before storage 
+✅ Server-side = Easier, integrated into AWS services, AWS manages keys or optionally client can - On the AWS server after AWS receives the data, data is plain during upload(transist) encryption by AWS before storage 
 
 CS- you use your key to encryption a file and then send to s3
 SSE-s3: AWS handles keys and encryotion automatically

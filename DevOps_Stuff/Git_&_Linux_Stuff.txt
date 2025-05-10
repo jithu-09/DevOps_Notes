@@ -1,7 +1,7 @@
 Git & Linux:
 
-##Change onwer of a file: chmod <username> <file>
-e.g: chmod ubuntu /var/sys/org/script.sh
+##Change onwer of a file: chown <username> <file>
+e.g: chown ubuntu /var/sys/org/script.sh
 ls -ltr: shows that script.sh has a new owner ubuntu
 
 ##crontab -l: to see cronjobs that are running

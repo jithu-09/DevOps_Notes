@@ -11,7 +11,10 @@ Untracked files:
 
 nothing added to commit but untracked files present (use "git add" to track)
 
-why is it showing nothing to commit when i added DevOps_Stuff_2
+why is it showing nothing to commit when i added DevOps_Stuff_2:
+✅ DevOps_Stuff_2 is tracked, unchanged → nothing new to commit.
+⚠️ DevOps_Notes/ and .yaml files are untracked → Git is reminding you to git add them 
+if you want them included in a commit.
 
 n) $ git filter-repo --path DevOps_Stuff_2/DevSecOps_implementation.txt --invert-paths
 Aborting: Refusing to destructively overwrite repo history since
@@ -102,6 +105,32 @@ From https://github.com/jithu-09/DevOps_Notes
 fatal: refusing to merge unrelated histories
 
 commit is done, then got thisgit push origin main
+
+-fatal: refusing to merge unrelated histories
+This means the local and remote repo histories are too different (usually happens after 
+reinitializing or rewriting history).
+ fix:
+   git pull origin main --allow-unrelated-histories
+   # Resolve any merge conflicts if prompted, then:
+     git add .
+     git commit -m "Merge remote changes"
+     git push origin main
+
+✅ Step-by-step Fix Using git filter-repo:
+⚠️ Make sure to work in a fresh clone of the repo as required by git filter-repo.
+
+-Clone your repo to a fresh directory:
+git clone https://github.com/jithu-09/DevOps_Notes.git devops_cleaned
+cd devops_cleaned
+
+-Run git filter-repo to remove the file(s) with secrets:
+git filter-repo --path 'DevOps_Stuff_2/git_stuff.txt' --invert-paths
+git filter-repo --path 'DevOps_Stuff_2/DevSecOps implementation.txt' --invert-paths
+
+-Force push the cleaned repo:
+git push --force origin main
+
+
 To https://github.com/jithu-09/DevOps_Notes.git
  ! [rejected]        main -> main (fetch first)
 error: failed to push some refs to 'https://github.com/jithu-09/DevOps_Notes.git'
@@ -125,3 +154,15 @@ See git-pull(1) for details.
     git pull <remote> <branch>
 
 If you wish to set tracking information for this branch you can do so with:
+
+
+issue?:
+Your local branch main is not tracking the remote origin/main.
+So when you ran git pull, Git didn’t know which branch to pull from.
+fix:
+  git branch --set-upstream-to=origin/main
+  more explictlly:
+  git branch --set-upstream-to=origin/main main
+  git pull
+  And after resolving any merge conflicts (if any):
+  git push

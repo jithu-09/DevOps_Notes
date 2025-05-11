@@ -69,7 +69,7 @@ string = "Hello, World!"
 count = string.count("o")
 print(count)  # Output: 2
 # string slicing
-# 1. string[start:end] - Returns a substring from start index to end index (exclusive).
+# 1. string[start:end] - Returns a substring from start index(inclusive) upto end index (exclusive).
 
 a=int(input()) # 
 b=int(input()) #
@@ -89,7 +89,7 @@ def div():
 
 #calling the functions
 print("add:" + " " + str(add())) # this can also be as: print("add:", str(add(5,10)))
-print("sub:" + " " + str(sub()))
+print("sub:" + " " + str(sub())) # using format string: print(f"sub: {sub()}")
 print("mul:" + " " + str(mul()))
 print("div:" + " " + str(div()))
 
@@ -118,7 +118,8 @@ tuple1 = (1, 2, 3)
 
 #remove item in list
 list1 = [1, 2, 3, 4, 5]
-for i in list1: # while list1[i] != 3: print(list1[i])    if list1[i] == 3:
+for i in list1: # while list1[i] != 3: print(list1[i])    
+   if list1[i] == 3:
         del list1[i]
         print(i)
         break

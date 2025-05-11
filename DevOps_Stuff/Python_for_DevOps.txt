@@ -1,8 +1,9 @@
 Python for DevOps # keywords, data types, operators, logical reasoning #interpreted lang, dynamically typed lang
 
--py(adv ops- API integration, complex logic, reusable code etc) for Linux and windows, shell scripting(monitoring, env or variable ops, system admin tasks, cli interaction) for only Linux
+-py(adv ops- API integration, complex logic, reusable code etc) for Linux and windows, shell scripting(monitoring, env or 
+variable ops, system admin tasks, cli interaction) for only Linux
 
-- execute all py files in a dir: for i in 'ls'; do python $i; done
+- execute all py files in a dir: for i in $(ls | grep '\.py$'); do python "$i"; done 
 
 - ec2InstanceName : camel casing, ec2_instance_name: snake casing(coz of "_") 
 
@@ -90,12 +91,19 @@ def foo():
 
 random_var = "hi"
 foo()
-Will error because random_var is outside the function.
+Will give an error because random_var is outside the function.
 
-Unless you pass it or declare it global.
+Unless you pass it:
+def foo(rand_var):                # Defines a function that takes one argument
+    print(f"{rand_var}")         # Prints the argument using an f-string
+
+random_vari = "hi"               # Assigns "hi" to the variable
+foo(random_vari)                 # Calls the function with that variable
+
+ or declare it global.
 
 -BOTO3: module used to create resources and interact with aws api
 better for quick action, and scripting than CFT, and terraform(will be tedious for simple steps)
-better than AWS cli, as it comes in handy when deadling with serverless compute, can't use cli for that pupose
+better than AWS cli, as it comes in handy when dealing with serverless compute, can't use cli for that pupose
 
 client = boto3.client('<resource>') => can interact with the 'resource' using 'client, refer boto3 docs for all ops.

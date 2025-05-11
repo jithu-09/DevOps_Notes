@@ -17,7 +17,7 @@ server_config = {
 }
 
 def get_server_status(server_name):
-    return server_config.get(server_name, {}).get('status', 'Server not found')
+    return server_config.get(server_name, {}).get('status', 'Status not found')
 
 server_name = 'server'
 status = get_server_status(server_name)
@@ -25,13 +25,15 @@ print(f"{server_name} status: {status}")
 
 def update_server_config(filepath, key, value):
     with open(filepath, 'r') as file:
-        data = file.readlines()
+        data = file.readlines()  # Read all lines from the file into a list
+
     with open(filepath, 'w') as file:
         for line in data:
             if key in line:
-                file.write(f"{key}={value}\n")
+                file.write(f"{key}={value}\n")  # Overwrite the line if it contains the key
             else:
-                file.write(line)
+                file.write(line)  # Else, write the original line back unchanged
+
 
 update_server_config('server_config.txt', 'PORT', '9090')
 

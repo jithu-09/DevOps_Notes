@@ -42,11 +42,10 @@ on: #tells on what action the workflow should be triggered
   push:
      branch: [main]
      path-ignores:
-        - '<give file name here' #updates here will not trigger the pipeline.
-
-  (or)
+        - '<give file name here>' #updates here will not trigger the pipeline.
   pull:
      branch: [main]
+  workflow_dispatch: #to trigger manually
 
 jobs:
     test: #"name" of the job, runner specified using "runs-on", steps in the job given as "steps:"
@@ -74,11 +73,11 @@ example of a job:
       uses: actions/setup-node@v4
       with: 
         node-version: '20'
-        cache: 'npm' #to prevent downloading dependencies evrrytime
+        cache: 'npm' #to prevent downloading dependencies everytime
     similary install dependencies and run test
 
 #for light weight cluster, use kind over minikube, why? very lightweight
-#port-forward can be done at pod leve, deployment level or svc level
+#port-forward can be done at pod level, deployment level or svc level
 
 For AMD64 / x86_64
 [ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.27.0/kind-linux-amd64
@@ -91,7 +90,7 @@ install docker:
  sudo apt update
 sudo apt install docker.io	
 sudo usermod -aG docker $USER
-newgrp docker
+sudo systemctl restart docker
 
 #create cluster: kind create cluster --name=devsecops-cluster
 
@@ -104,12 +103,15 @@ kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/st
 
 #access ui from ec2 instance: kubectl port-forward svc/argocd-server 9000:80 -n argocd --address 0.0.0.0
 #access appn :kubectl port-forward tic-tac-toe-795bcbc7f4-5tlq9 9098:80 --address 0.0.0.0 #port-frwd a pod
-
+#The --address flag in kubectl port-forward specifies the local network interface to bind to. Using 0.0.0.0 means the 
+service will be accessible from any network interface (i.e., any IP address on the machine), not just localhost
 
 #echo ksaidufoaifcc== | base64 --decode
 
-# if image pushed to public repo, directly updateing repo details, folder name in source, selecting syn policy, cluster url, namespace(default), we'll be able to deploy the app.
-#in case of private container registry, like ghcr, onlyu people with access can do it, how? Add image pull secrets in deployment.yaml(add username and pswd) => argocd can pull image from pvt cont reg
+# if image pushed to public repo, directly updating repo details, folder name in source, selecting syn policy, cluster url, 
+namespace(default), we'll be able to deploy the app.
+#in case of private container registry, like ghcr, only people with access can do it, how? Add image pull secrets in 
+deployment.yaml(add username and pswd) => argocd can pull image from pvt cont reg
 run this:
 
 ubuntu@ip-172-31-24-2:~$ kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 -d
@@ -118,4 +120,3 @@ Ix31xB-3jykGqRhlubuntu@ipkubectl create secret docker-registry github-container-
   --docker-username=jithu-09 \ #github username
   --docker-password=<token> \ #github token added in repo
   --docker-email=k.jithu2011@gmail.com #can give anything actually
-

@@ -1,0 +1,103 @@
+Taints and tolerations to control pod scheduling in Kubernetes.
+
+Step 1: Taint the Node
+Let’s say you have a node in zone us-east-1a and you want to only allow specific pods to be scheduled on it.
+
+You can taint the node like this:
+
+kubectl taint nodes node-us-east-1a zone=us-east-1a:NoSchedule
+
+This means: No pod will be scheduled on this node unless it has a matching toleration.
+The key is zone, the value is us-east-1a, and the effect is NoSchedule.
+
+Step 2: Pod Spec with Matching Toleration
+Now, here’s a pod manifest that tolerates that taint:
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-zoned-pod
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+  tolerations:
+  - key: "zone"
+    operator: "Equal"
+    value: "us-east-1a"
+    effect: "NoSchedule"
+
+This pod will be allowed to run on the tainted node because it has a matching toleration.
+#incase of multiple nodes in multiple zones: only add the taint of the node to which you want to deploy the pod.
+
+🔒 What Happens Without the Toleration?
+If you try to deploy a pod without the toleration:
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-unzoned-pod
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+
+It won’t be scheduled on the tainted node. Kubernetes will look for another node that doesn’t have that taint.
+
+#pod with toleration for all zones:
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-any-zone
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+  tolerations:
+  - key: "zone"
+    operator: "Exists"
+    effect: "NoSchedule"
+
+##Node Affinity is like saying: “I want to run on a node in zone us-east-1a.”
+##Taints are like the node saying: “You can’t run here unless you tolerate my taint.”
+
+So, to schedule a pod on a tainted node, the pod must:
+
+Match the node’s labels (via node affinity).
+Tolerate the node’s taints (via tolerations).
+
+node setup: affinity + taint
+kubectl label node node-1a topology.kubernetes.io/zone=us-east-1a
+kubectl taint node node-1a zone=us-east-1a:NoSchedule
+
+pod setup:
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-in-1a
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: topology.kubernetes.io/zone
+            operator: In
+            values:
+            - us-east-1a
+  tolerations:
+  - key: "zone"
+    operator: "Equal"
+    value: "us-east-1a"
+    effect: "NoSchedule"
+
+=> pod only scheduled on node in us-east-1a, toleration makes sure it can bypass the taint.
+
+# syntax to remove taint: kubectl taint nodes <node-name> <key>:<effect>-
+ex: with taint : kubectl taint nodes node-1a zone=us-east-1a:NoSchedule
+    removing taint: kubectl taint nodes node-1a zone:NoSchedule-
+"Remove the taint with key zone and effect NoSchedule from node-1a."
+
+# to list taints on a node: kubectl describe node <node-name>
+- look for taints in the output

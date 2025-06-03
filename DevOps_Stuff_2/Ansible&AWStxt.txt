@@ -2,23 +2,24 @@ ansible-config mang tool, makes sys admin life easy
 -os,patch, app deps installation and updation alomg with maintainace
 
 - works in pull method
-agent only on ctrl node(Linux os preferred) no need on magd nodes(only oy required)
+agent only on ctrl node(Linux os preferred) no need on magd nodes(only py required)
 
-- internally py, converts yaml to py and executes req py ,modules for the tasks
+- internally py, converts yaml to py and executes req py modules for the tasks
 
 managed nodes ips, users are stored in inventory file(inventory.ini, can be anywhere in the dir)
 
 ansible collections- modules, roles of tech and svcs like aws that ansible uses to interact with their apis to perform certain tasks
-can be used for marketplace or create in ansible galaxy
+can be used from marketplace or create in ansible galaxy
 
-playbook collection of tasks, can run adhoc(one-off commands that are executed on the command line of an Ansible control node, without the need for a 
-playbook or any additional configuration) also for smaller tasks.
+playbook: collection of tasks, can run adhoc(one-off commands that are executed on the command line of an Ansible control node, without the need 
+for a playbook or any additional configuration) also for smaller tasks.
 
-ansible vault- for storing sensitive info, out of the box, no addn installation req, ansible-vault is the cmd
+ansible vault- for storing sensitive info, out of the box => no addn installation req, ansible-vault is the cmd
 
-policy as code- for security and compliance, progamtically attach and update policies of targeted resources.
+policy as code- for security and compliance, programatically attach and update policies of targeted resources.
 
-order of execution- t2 is executed only if t1 is good in all nodes, failure excemption to overcome this, failed when: give conds which can ignored, 
+order of execution- t2 is executed only if t1 is good in all nodes, failure excemption to overcome this, failed when: give conds which can 
+ignored, 
 ignore_errors:yes
 
 
@@ -83,7 +84,7 @@ AWS CFT- cloud formation templates
 To create and manage infra in aws using IAC principles
 write yaml/json -> converted to api calls understable by AWS
 stack- import yaml file of the infra to be provisioned to aws
-structure- version, descrition, metadata, rules, mapping, conds, resources, outputs
+structure- version, description, metadata, rules, mapping, conds, resources, outputs
 declarative, versioned, supports drift detection
 
 AWS code pipeline- to implement CI: integrate tools and processes to build app and CD: to deploy app to user or spec platform
@@ -94,16 +95,16 @@ code build for CI and code deploy for CD- if code deploy deploys app to ec2- iam
 ec2, yaml file in root of repo
 
 unit test, code quality, automatic tests, deployment
-Jenkins better alternative- declarative, open source, free of cost, but not scalable(master node always present, more no of nodes at all time- GitHub 
-actions better alternative
+Jenkins better alternative- declarative, open source, free of cost, but not scalable(master node always present, more no of nodes at all time- 
+GitHub actions better alternative)
 
-code checkout, code quality scan, build image, img scan, image push, upate k8 repo, upate helm charts(package manager used to manage, install k8s appn), 
-argocd for CD, deploy to k8 cluster
+code checkout, code quality scan, build image, img scan, image push, upate k8 repo, upate helm charts(package manager used to manage, install 
+k8s appn), argocd for CD, deploy to k8 cluster
 
-cloud watch- monitor everything(activities, processes) in your cloud(infra and apps)- logging, alerting, reporting, alarms, real life metrics, cpu util, 
-mem util etc.
-custom metrics avail, logs to see everything that happened, 1036 metrics enabled by default, cost opt and scal - avail but not default but by integration 
-with others svcs
+cloud watch- monitor everything(activities, processes) in your cloud(infra and apps)- logging, alerting, reporting, alarms, real life metrics, 
+cpu util, mem util etc.
+custom metrics avail, logs to see everything that happened, 1036 metrics enabled by default, cost opt and scal - avail but not default but by 
+integration with others svcs
 
 AWS lambda- serverless, compute purpose- evrything (prov, mang, scale up and dn, tear down)by aws
 ip add and loc not visible- if you need endpt to lambda fun, enable in adv setting
@@ -112,14 +113,14 @@ cost eff. a role is created by default with func, can modify it, default exec ti
 
 Cloudfront- aws sol for Cloud delivery network(CDN)
 req in internet goes through multiple hops to reach destintion and send back req_> hops proportional to latency
-caches data in nearest edge locations to users-> latency decreases,req need not access end point but cdn. origin access identity to be enabled in bucket 
-policy
+caches data in nearest edge locations to users-> latency decreases,req need not access end point but cdn. origin access identity to be enabled 
+in bucket policy
 s3 static hosting- costly,  not secure, latency -> soln cloudfront 
 
-ecr- docker hub for aws- store, mange, deploy images securely, pvt by default, iam based access can be public, scalable, lifecycle policies(auto cleanup 
-of unused images to dec cost, inc efficiency, retaine recent vers only, expires untagged imgs)-eks, ecs, lambda integration.
+ecr- docker hub for aws- store, mange, deploy images securely, pvt by default, iam based access can be public, scalable, lifecycle policies(auto 
+cleanup of unused images to dec cost, inc efficiency, retaine recent vers only, expires untagged imgs)-eks, ecs, lambda integration.
 
-ecs-el cont svc- cont orch svc like k8s(inferior to k8s)- deploy, manage scal cont appn- higly scalabke, reliable, secure
+ecs-el cont svc- cont orch svc like k8s(inferior to k8s)- deploy, manage scal cont appn- higly scalable, reliable, secure
 has task def(like pods)(task def role- makes api calls to other svc on your behalf)-> run these to get tasks which give containers
 pod- tells how to run a container and the reqs to run it
 
@@ -127,12 +128,12 @@ aws system manager(less sensitive info) + aws secrets manager(more sens info, co
 
 load bal- to distribute traffic to your resources efficiently
 
-req flow- app layer(decide which protocol to tranfer req), pres layer, session layer(session info- what req, who sent etc), transport layer(divided to 
-small chunks to decrease latency), ntwk layer, data link layer and phy layer and back in the same process 
+req flow- app layer(decide which protocol to tranfer req), pres layer, session layer(session info- what req, who sent etc), transport 
+layer(divided to small chunks to decrease latency), ntwk layer, data link layer and phy layer and back in the same process 
 
-traffic routing in app layer- app lb- slow, costly, adv routing tech(host, path, domains), ssl offloading ie secure transfer for plain req also, highly 
-secure
-at ntwk layer- ntwk lb- low latency high transger speed, no http transfer, tcp and udp packets routing, sticky session avail
+traffic routing in app layer- app lb- slow, costly, adv routing tech(host, path, domains), ssl offloading ie secure transfer for plain req also, 
+highly secure 
+at ntwk layer- ntwk lb- low latency high transfer speed, no http transfer, tcp and udp packets routing, sticky session avail
 
 gateway lb- for req from vpn, vm, firewall etc, others cant handle them, sent in most secure way
 

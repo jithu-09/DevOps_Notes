@@ -1,29 +1,31 @@
-For your pipeline to work and successfully deploy the application to your AWS EKS cluster, you need to ensure that the following AWS services and resources are properly configured:
+For your pipeline to work and successfully deploy the application to your AWS EKS cluster, you need to ensure that the following AWS services and 
+resources are properly configured:
 
 1. Elastic Kubernetes Service (EKS) Setup
 EKS Cluster
-
 Create an EKS cluster (docker-k8s in your case) using the AWS Management Console, AWS CLI, or Terraform.
 Ensure the cluster is active and in a healthy state.
-Node Group
 
+Node Group
 Attach one or more node groups (EC2 instances) to the cluster.
 Use an instance type like t3.medium or larger based on your application's requirements.
 Ensure the node group is in the same VPC as the EKS cluster.
-IAM Role for Nodes
 
-The nodes need an IAM role with the necessary permissions for EKS. Attach the AmazonEKSWorkerNodePolicy, AmazonEC2ContainerRegistryReadOnly, and CloudWatchAgentServerPolicy managed policies to the IAM role.
+IAM Role for Nodes
+The nodes need an IAM role with the necessary permissions for EKS. Attach the AmazonEKSWorkerNodePolicy, AmazonEC2ContainerRegistryReadOnly, and 
+CloudWatchAgentServerPolicy managed policies to the IAM role.
+
 2. IAM Configuration
 IAM Role for Jenkins
-
 If Jenkins is running on an EC2 instance, attach an IAM role to the instance with the following policies:
 AmazonEKSClusterPolicy
 AmazonEC2ContainerRegistryPowerUser
 AmazonS3ReadOnlyAccess (if you use S3 for anything like storing artifacts)
 AmazonEKSWorkerNodePolicy (optional if interacting directly with nodes)
-AWS Credentials in Jenkins
 
+AWS Credentials in Jenkins
 Store the aws-creds credentials (Access Key ID and Secret Access Key) in Jenkins credentials.
+
 3. VPC Networking
 Networking Configuration
 The cluster and node group should be in the same VPC and subnets.
@@ -31,39 +33,37 @@ Ensure subnets are public or private with proper route tables and internet acces
 Add security group rules to allow communication between pods and external services:
 Allow ingress/egress traffic for port 5000 (your app).
 Allow SSH and Kubernetes API traffic (if needed for debugging).
+
 4. Kubernetes Configuration
 Service Account with IAM Role
+Create a service account in the EKS cluster that maps to an IAM role with permissions for the resources your pods will access (e.g., S3 or 
+DynamoDB).
 
-Create a service account in the EKS cluster that maps to an IAM role with permissions for the resources your pods will access (e.g., S3 or DynamoDB).
 Update kubeconfig
-
 Ensure Jenkins can access the cluster by updating kubeconfig using:
-bash
-Copy code
 aws eks --region us-east-1 update-kubeconfig --name docker-k8s
 Verify cluster access:
-bash
-Copy code
 kubectl get nodes
+
 5. Amazon Elastic Container Registry (Optional)
 If you're using AWS ECR instead of Docker Hub:
 Create an ECR repository for the flask-web-app.
-Update the docker push command to push to ECR:
-bash
-Copy code
-docker push <aws_account_id>.dkr.ecr.${AWS_REGION}.amazonaws.com/flask-web-app:${BUILD_NUMBER}
 Authenticate Docker with ECR before pushing:
-bash
-Copy code
-aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin <aws_account_id>.dkr.ecr.${AWS_REGION}.amazonaws.com
+aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin 
+<aws_account_id>.dkr.ecr.${AWS_REGION}.amazonaws.com
+Update the docker push command to push to ECR:
+docker push <aws_account_id>.dkr.ecr.${AWS_REGION}.amazonaws.com/flask-web-app:${BUILD_NUMBER}
+
 6. Deployment and Service Manifests
 Ensure deployment.yaml and service.yaml are configured properly:
 Deployment: Specifies the pod details and Docker image tag.
 Service: Exposes the application (ClusterIP, NodePort, or LoadBalancer).
 Both should target the same namespace (default).
+
 7. Permissions for Kubectl
 Ensure Jenkins has permission to run kubectl commands:
 Update the IAM role associated with Jenkins to include AmazonEKSClusterPolicy.
+
 8. Jenkins Instance Setup
 Docker
 Docker must be installed on the Jenkins instance to build and push images.
@@ -71,21 +71,16 @@ Kubectl
 Install kubectl on the Jenkins instance.
 AWS CLI
 Install the AWS CLI for cluster updates and kubectl configuration.
+
 9. Validation
 Test the following steps manually to ensure proper setup before running the pipeline:
 Connect to the EKS cluster with kubectl.
 Apply the deployment.yaml and service.yaml manually:
-bash
-Copy code
 kubectl apply -f deployment.yaml
 kubectl apply -f service.yaml
 Verify pods are running:
-bash
-Copy code
 kubectl get pods
 Verify service exposure and connectivity:
-bash
-Copy code
 kubectl get services
 
 pipeline: zorroborro/ docker-k8s

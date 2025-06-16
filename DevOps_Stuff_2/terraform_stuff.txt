@@ -18,48 +18,80 @@ in data.aws_ami.latest.id, the "data" object is the top-level namespace that Ter
 
 The behavior of LOCAL_ONLY data sources is the same as all other data sources, but their result data exists only temporarily during a Terraform operation, and is re-calculated each time a new plan is created.
 
+data "time_sleep" "wait_a_bit" {
+  create_duration = "10s"
+}
+-> time_sleep is LOCAL_ONLY data source, this delay is not saved in .tfstate
+-> A regular data source (like aws_ami) fetches and stores results in the state file.
+A LOCAL_ONLY data source like time_sleep does not — it’s always re-evaluated at runtime.
 
 for quick update to infra-  terraform apply -refresh=false
 
-A requirement has come up which requires you to inspect the state file of terraform configuration. Your terraform script is already configured to work with the remote backend. Which of the following commands would you use to view a specific field in the state file
-
-it is TERRAFORM STATE PULL as: it will pull the state file form remote backend, as direct access is not there => terraform state show can not be used as the address is not know of the state file.
+A requirement has come up which requires you to inspect the state file of terraform configuration. Your terraform script is 
+already configured to work with the remote backend. Which of the following commands would you use to view a specific field 
+in the state file:
+=>it is TERRAFORM STATE PULL as: it will pull the state file form remote backend, as direct access is not there => terraform. 
+=>state show can not be used as the address is not know of the state file.
 
 To disable the state locking for most commands: use "-lock" cmd
+=> terraform apply -lock=false(lly plan, destroy)
 
-To lists all the resources recorded within the Terraform state file:  use state list
-
+To lists all the resources recorded within the Terraform state file:  terraform state list
 
 What are the steps required to remove a resource from the management of terraform?
 Use the terraform state rm command followed by manual removal of corresponding resources from the configuration file as well
+=> terraform state rm aws_s3_bucket.demo
 
 Which of the following terraform state sub-commands list detailed information about a resource from the state file?
 "show"
 
-dependency lock file: terraform.lock.hcl- helps manage external provider dependencies within the terraform configuration, ensures consistent provider versions across all environments and terraform operations
+dependency lock file: terraform.lock.hcl- helps manage external provider dependencies within the terraform configuration, 
+ensures consistent provider versions across all environments and terraform operations
 "consistency" "compatibility assurance" "reproducibility"
 updated with terraform init
 contains- exact versions, provider checksums, provider information
 update both 🔹providers and 🔹modules to latest allowed by version constraints- terraform init -upgrade
 ->terraform get -update: download and update modules used in the config file
-
 ensures stable and predicatable infrastructure deployments
 
-
 cmd:
-terraform init, plan or  apply -refresh-only(only modifies state file no infra changes), apply, validate, show -json,  fmt, output, graph(visualize using graphviz), state list(all resources in state file, can give a specific resource also),  mv( give source and dest, should rename in resource file),  pull,  show(give address of resource ie aws_instance.ecc2.id), rm(remove associated file from resource blk as well), state push ./terraform.tfstate(to override with a local statefile)
+terraform init, plan or  apply -refresh-only(only modifies state file no infra changes), apply, validate, show -json,  fmt, 
+output, graph(visualize using graphviz), state list(all resources in state file, can give a specific resource also),  mv( 
+give source and dest, should rename in resource file),  pull,  show(give address of resource ie aws_instance.ecc2.id), 
+rm(remove associated file from resource blk as well), state push ./terraform.tfstate(to override with a local statefile)
+
+# 1️⃣ List all resources in the state file
+terraform state list
+# List a specific resource
+terraform state list aws_instance.ec2
+# 2️⃣ Move/rename a resource in state
+terraform state mv aws_instance.old_name aws_instance.new_name
+# (Also update the .tf file to match the new name)
+# 3️⃣ Remove a resource from Terraform management (but not destroy it)
+terraform state rm aws_s3_bucket.demo
+# 4️⃣ Show raw state data for a resource
+terraform state show aws_instance.ec2
+# To fetch only the resource ID or any property
+terraform state show aws_instance.ec2 | grep id
+# 5️⃣ Pull the full state file (in JSON format)
+terraform state pull > state.json
+# 5️⃣ Pull the full state file (in JSON format)
+terraform state pull > state.json
 
 removed from statefile means- removed from tf management
 if the local file is completely diff from current statefile, tf throws an error
 
 it is necessary to initialize the terraform configuration directory prior to execution of terraform validate.
 
-The terraform providers __mirror____ command can automatically populate a directory that will be used as a local filesystem mirror in the provider installation configuration.
+The terraform providers __mirror____ command can automatically populate a directory that will be used as a local filesystem 
+mirror in the provider installation configuration.
 
-The terraform graph command is used to generate a visual representation in DOT format
+The terraform graph command is used to generate a visual representation in DOT format, It represents the dependency graph between resources.(not actual graph)
+To Visualize:
+terraform graph | dot -Tpng > graph.png (needs graphviz)
 
 create_before_destroy
-prevent_destroy(not immune to teraform destroy, prevents deletion on applky if any config changes)
+prevent_destroy(not immune to teraform destroy, prevents deletion on apply if any config changes)
 ignore_changes(provide what all attribute changes to ignore)
 or use ignore_changes=all
 
@@ -69,23 +101,23 @@ persist logs: export TF_LOG_PATH=/temp/terraform.log
 head -10 TF_LOG_PATH
 unset TF_LOG_PATH
 
-force replacement even though no infra change=>terraform -replace=,resource-name>
+force replacement even though no infra change=>terraform -replace=<resource-name>
 
-terraform import to import an existing infra resource, but first atleast create an empty resource blk for it and later update it after import
+terraform import to import an existing infra resource, but first atleast create an empty resource blk for it and later 
+update it after import
 
 import only updates statefile and not config file, next plan and apply, resource will be managed by tf there on
 
-The example below will import an AWS instance into the aws_instance resource named bar into a module named foo.
+The example below will import an AWS instance(i-abcd1234) into the aws_instance resource named bar into a module named foo.
 
-terraform import module.foo.aws_instance.bar i-abcd1234
+terraform import module.foo.aws_instance.bar i-abcd1234 (terraform import [options] ADDRESS ID)
+#You must already have the resource block declared in your code
 
 cant delete default workspace, cant rename it
 list all workspaces: terraform workspace list
 
 rename is invalid subcmd for terraform workspace
-ca use: new, list, show, delete, select
-
-terraform import [options] ADDRESS ID
+can use: new, list, show, delete, select
 
 mention count in resource to create as many resources
 
@@ -96,10 +128,10 @@ resource "aws_instance" "ec2"{
  instance_type=""
  count =3 # creates 3 instances as list i.e, ec2[0],[1],[2] but count =2, it removes lat element not the first one 
  so all elemts are moved ahead and last one removed so 2->1, 3->2, 1->3 => element at index=2 is removed
-or like count = length(var.servrs)
+or like count = length(var.servers)
  tags = {
     Name = var.webserver[count.index]
-
+or
 # using for each
  for_each = toset(var.servers) #servers is a set or map(type = set or type=map), here which element is removed then only the corresponding index cleared
  tags ={
@@ -125,10 +157,10 @@ provisioner remote_exec {
 provisioner local_exec{ #does not need a connection block defined
 when = destroy  #destroy time provisoner
 command = "echo ${aws_instance.ec2.ip} >> /tmp/text.txt"
-  
 }
 
-if any error in provisioner => terraform apply also fails(default behaviour), can set on_failure = fail(just like "when"), these resources will be marked as tainted by tf- to avoid this on_failure=continue
+if any error in provisioner => terraform apply also fails(default behaviour), can set on_failure = fail(just like "when"), 
+these resources will be marked as tainted by tf- to avoid this on_failure=continue
 
 Expressions in provisioner blocks cannot refer to their parent resource by name. They can use special "self" objects.
 
@@ -136,7 +168,7 @@ functions:
 *file()
 
 *max() or numbers= type(set)
-         default = [ 256, 345, 34, 2] we can write max(var.num..)
+         default = [ 256, 345, 34, 2] we can write max(var.numbers...)
 var.numbers is already defined as a set of numbers, you can directly use Terraform's max() function with the splat operator (...) to find the maximum value.
 *min()
 *length()
@@ -172,9 +204,9 @@ or index(var.ami,2)-> gives element at index=2
 can give a default value to return in that case as: lookup(var.ami, "ami-efg", "ami-pqr")
 #map()- no longer avil in tf, have tomap(), zipmap()
 #Terraform does not support user-defined functions.
-#We cannot use the file or templatefile function to read files that our configuration might generate dynamically on disk as part of the plan or apply steps.
+#We cannot use the file or templatefile function to read files that our configuration might generate dynamically on disk as 
+part of the plan or apply steps.
 #Passing an object containing a sensitive input variable to the keys() function will result in a list that is "sensitive".
-
 
 logical ops:
 &&, ||, !, !=, >=, <=, ==
@@ -238,18 +270,23 @@ to_ports = [
 # an input variable in terraform cannot make use of other variables.
 
 #we cant use dynamic blocks to generate meta-argument blocks such as lifecycle and provisioner blocks
-#Some providers define resource types that include multiple levels of blocks nested inside one another. You can generate these nested structures dynamically when necessary by nesting dynamic blocks in the content portion of other dynamic blocks.
-#A dynamic block can only generate arguments that belong to the resource type, data source, provider or provisioner being configured. It is not possible to generate meta-argument blocks such as lifecycle and provisioner blocks , since Terraform must process these before it is safe to evaluate expressions.
-#interractive console- terraform console- loads the state associated with the config directory=> can use all the values, variables stored in config files available up until then
-
+#Some providers define resource types that include multiple levels of blocks nested inside one another. You can generate 
+these nested structures dynamically when necessary by nesting dynamic blocks in the content portion of other dynamic blocks.
+#A dynamic block can only generate arguments that belong to the resource type, data source, provider or provisioner being 
+configured. It is not possible to generate meta-argument blocks such as lifecycle and provisioner blocks , since Terraform 
+must process these before it is safe to evaluate expressions.
+#interactive console- terraform console- loads the state associated with the config directory=> can use all the values, 
+variables stored in config files available up until then
 
 modules in tf - simpler config files, low risk, reusability, std config, similar to packages and libs in programming langs
 
-*root module: can call other modules and connect them together by passing output values from one as input values to another. Current tf configuration that contains the tf files.
+*root module: can call other modules and connect them together by passing output values from one as input values to 
+another. Current tf configuration that contains the tf files.
 *terraform init, terraform get: the ways available to download the module in your current terraform configuration directory
 
 *Terraform maintains partial backward compatibility but not always full backward compatibility.
- Minor Updates (Patch & Minor Versions): Generally backward compatible, meaning your existing configurations should work without changes.
+ Minor Updates (Patch & Minor Versions): Generally backward compatible, meaning your existing configurations should work 
+without changes.
  Major Updates: May introduce breaking changes, requiring updates to your code.
  State File Compatibility: Upgrading Terraform may sometimes require state migrations.
 Always check the Terraform release notes before upgrading and use <terraform init -upgrade> cautiously.

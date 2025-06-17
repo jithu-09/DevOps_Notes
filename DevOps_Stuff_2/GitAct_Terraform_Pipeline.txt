@@ -10,6 +10,10 @@ on:
 jobs:
   terraform:
     runs-on: ubuntu-latest
+    env:
+      TF_WORKING_DIR: . # or ./terraform if your files are in a subfolder
+      # it must be declared at workflow or job level to use in working-directory. Not inside a step, it win't work as 
+      # working directory will be resolved before step level env is loaded.
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3

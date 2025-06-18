@@ -425,15 +425,6 @@ Azure DevOps Services
 
 * With the latest versions of Terraform, terraform init can automatically download community providers. More specifically, this feature was added with Terraform 0.13. Before 0.13, terraform init would NOT download community providers. you need to specify the provider in your configuration using the provider block and include the provider's source repository in your configuration. Terraform will download and install the provider automatically when you run terraform init, provided that the provider is available in the Terraform provider registry.
 
-
-*The default argument within the variable block should satisfy which of the following conditions:
-
-( ) default argument requires a literal value
-( ) It cannot reference other objects in the configuration.
-(✅) All of the options
-( ) If present, the variable is considered to be optional.
-( ) default value will be used if no value is set when calling the module or running Terraform.
-
 *Select the best practices around using dynamic block.
 
 ( ) Use them when you need to hide details in order to build a clean user interface for a reusable module.
@@ -441,7 +432,7 @@ Azure DevOps Services
 ( ) Overuse of dynamic blocks can make configuration hard to read and maintain.
 (✅) All of the options
 
-*In Terraform, the backend is responsible for determining where state is stored and can also influence where operations are performed (e.g., local vs. remote execution). However, some aspects of Terraform’s behavior, such as where operations are performed, might not always be strictly determined by the backend alone.
+*In Terraform, the backend is responsible for determining where state is stored and can also influence where operations are performed(might not always be strictly determined by the backend alone)(e.g., local vs. remote execution).
 
 *Terraform provider is not responsible for:
 B. Provisioning infrastructure in multiple clouds
@@ -459,7 +450,6 @@ Terraform providers are a plugin for Terraform that makes a collection of relate
 
 *Terraform providers are not always installed from the Internet. While Terraform does fetch providers from the HashiCorp Terraform Registry by default, it also allows for the usage of providers from other sources or even local sources.
 -For air gapped systems, we can bundle provider along with the Terraform binaries. These Bundle can be installed without internet on air gapped system(military/defense systems, nuclear power plants).
-
 
 *In Terraform 0.13 and above, outside of the required_providers block, Terraform configurations always refer to providers by their local names.     
 -Local names are module-specific, and are assigned when requiring a provider. Local names must be unique per-module.
@@ -488,11 +478,12 @@ In this example, the required_providers block specifies the source and version c
 *To configure a backend, add a nested backend block within the top-level "terraform" block.
 
 *Setting the TF_LOG environment variable to "DEBUG" does not cause debug messages to be logged into syslog. It actually causes the Terraform command-line tool to emit detailed debug output to the console (standard error output(stderr), specifically).
--erraform has detailed logs that you can enable by setting the TF_LOG environment variable to any value. Enabling this setting causes detailed logs to appear on stderr.
-
-*READ AND UNDERSTAND THE QUESTIONS PROPERLY
+-terraform has detailed logs that you can enable by setting the TF_LOG environment variable to any value. Enabling this setting causes detailed logs to appear on stderr.
 
 *a plan can be stored as a file and another person can execute the plan file, so => Only the user that generated a plan need not apply it.
+- terraform plan -out=tfplan
+- terraform show tfplan #inspect plan in a human readable format
+- terraform apply tfplan
 
 *We can use providers to supply variable values (vault for example).
 We can provide input variable value in parameter for apply command.
@@ -515,16 +506,15 @@ Use the version argument in the module block to specify versions:
 
 module "consul" {
 source = "hashicorp/consul/aws"
-<version = "0.0.5"> #to specify the version to download
-
+version = "0.0.5" #to specify the version to download
 servers = 3
 }
 
 *We can declare a variable without any fields(type, default, descript, all fields are optional)
 
-*The default "local" Terraform backend stores the state file on the local disk of the machine running Terraform. The state file contains information about the resources managed by Terraform, such as their current state and any dependencies between them. When running Terraform commands, such as terraform plan or terraform apply, Terraform reads the state file to determine the current state of the resources and what changes need to be made to reach the desired state.
+*The default "local" Terraform backend stores the state file on the local disk of the machine running Terraform. The state file contains information about the resources managed by Terraform, such as their current state and any dependencies between them. 
 
-*Terraform is platform-agnostic and it can run on many different systems, including both Windows and Linux. It does not require a Server version of the Windows operating system. You can run it on a standard Windows 10 installation, for example. The only requirement is that you have the Terraform binary installed and that it's in your system's PATH.
+*Terraform is platform-agnostic and it can run on many different systems, the only requirement is that you have the Terraform <binary installed> and that it's in your <system's PATH>.
 
 *To use a provisioner in Terraform, you must include it as part of a resource configuration block. This is because a provisioner operates on a resource that has been created or updated by Terraform.
 -Example:
@@ -546,26 +536,22 @@ provisioner "local-exec" {
 command = "echo first"
 }
 
-provisioner "local-exec" {
-command = "echo second"
+provisioner "file-exec" {
+source=""
+destination=""
 }
 }
 
--provisioners are executed as part of the create and destroy phases of the resource lifecycle. They cannot exist independently outside of a resource block. If you decide to define a provisioner outside of a resource block , terraform with throw a syntax error.
+-provisioners are executed as part of the <create and destroy> phases of the resource lifecycle. They cannot exist independently outside of a resource block(terraform with throw a syntax error).
 
-*To be safe, you would like to first see all the infrastructure that will be deleted by Terraform.
-Which command should you use to show all of the resources that will be deleted? (Choose two.)
-A. Run terraform plan -destroy
-D. Run terraform destroy and it will first output all the resources that will be deleted before prompting for approval.
+to show all of the resources that will be deleted: terraform plan -destroy, terraform destroy (will first output all the resources that will be deleted before prompting for approval).
 
-*Secure variable storage is a feature that is available only in Terraform Enterprise or Terraform Cloud workspaces, and it is not available in the Terraform CLI.
- 
-Secure variable storage allows you to store sensitive information, such as API keys, passwords, or other credentials, securely within Terraform. These variables are encrypted and protected, ensuring that they are not exposed in plain text.
+*Secure variable storage only in Terraform Enterprise or Terraform Cloud workspaces, not available in the Terraform CLI.
+- store sensitive information: API keys, passwords, or other credentials( all are encrypted and protected, not exposed in plain text).
 
-*Terraform can import modules from various sources such as a Git repoitory, a local file system path, or a public or private module registry. However, an FTP server is not a supported module source in Terraform.
+*Terraform can import modules from various sources: Git repoitory, local file system path, public or private module registry. FTP server is not a supported module source.
 
 *The terraform force-unlock command is used only when automatic unlocking fails and a manual unlock is necessary. Force-unlock should not be used just to bypass normal locking.
--Your apply failed due to a state lock → ⚠️ Not necessarily a reason to use force-unlock. Instead, wait for Terraform to release the lock or troubleshoot the issue.
 -Use force-unlock only as a last resort to prevent potential state corruption. 
 
 *Terraform software is written in Go but it is not require to have go installed as you get a binary after installing terraform.
@@ -579,11 +565,7 @@ join → ✅ Valid: Joins a list of strings into a single string with a delimite
 chomp → ✅ Valid: Removes trailing newline characters from a string.
 slice → ❌ Not a valid string function in Terraform (It exists for lists, but not for strings).
 
-*It is not recommended to store secret data such as passwords, API keys, or other sensitive information in your version control system (VCS). This is a general best practice in software development, not just with Terraform.
-
 *If a module uses a local values, you can expose that value with a terraform output.
--Code example:
-
 variable "input" {
 description = "An input variable"
 default = "Hello"
@@ -596,11 +578,7 @@ local_value = "${var.input}, World!"
 output "greeting" {
 description = "A greeting message"
 value = local.local_value
-}
-
-Outputs:
-
-greeting = "Hello, World!"
+} => Output: Hello, World!
 
 *The registry extracts information about the module from the module's source. The module name, provider, documentation, inputs/outputs, and dependencies are all parsed and available via the UI or API, as well as the same information for any submodules or examples in the module's source repository.
 
@@ -610,10 +588,10 @@ B. Configuration file - not processed when running a terraform refresh
 C. Credentials - required to get onto the cloud
 D. Cloud provider - required to carry out the refresh of whats in the cloud vs whats in state.
 
-*If you manually destroy infrastructure, what is the best practice reflecting this change in Terraform? Run terraform refresh 
+*If you manually destroy infrastructure, what is the best practice reflecting this change in Terraform? Run terraform plan -refresh-only 
 
-*Terraform variables and outputs that set the "description" argument are not stored in the state file. The "description" argument is used to provide a human-readable description of the variable or output, and it is intended to be used as documentation for other users of the Terraform code.
--The state file is used to store the current state of the infrastructure managed by Terraform, including the values of variables and outputs. However, the "description" argument is not part of the state file, and it is not used by Terraform to manage the infrastructure. Instead, it is only used as metadata to describe the variable or output.
+*Terraform variables and outputs that set the "description" argument are not stored in the state file. It is intended to be used as documentation for other users of the Terraform code.
+-The state file is used to store the current state of the infrastructure managed by Terraform, including the values of variables and outputs. Not description as not used by Terraform to manage the infrastructure. 
 
 *"Golden images" refers to a specific method of deployment where a pre-configured image of an operating system or application is stored and used as a base for all new deployments. This method is "not" a key principle of Infrastructure as Code, but it is a common method of deployment in traditional IT environments.
 Infrastructure as Code is based on the following key principles:
@@ -621,23 +599,18 @@ A. Versioned infrastructure - The infrastructure is treated as code and is versi
 C. Idempotence - The infrastructure is provisioned in a repeatable and predictable manner, making it possible to run the provisioning scripts multiple times without creating additional resources or causing changes to existing resources. No new creation if nothing changed despite execution.
 D. Self-describing infrastructure - The code used to provision the infrastructure is human-readable and self-documented, making it easier to understand and maintain over time.
 
-*Statefile doesn't necessarily always matches the current infrastructure, since one can manually change resources and therefore drift from the state configuration. Terraform has no way to know or track changes made outside of it.
+*Statefile doesn't always matches the current infrastructure, manually changed resources can cause drift from the state configuration. Terraform doesn't track changes made outside of it.
 
-*One remote backend configuration always maps to a single remote workspace: False
 -1 workspace -> 1 backend
  1 backend -> multiple workspaces	
--A remote backend in Terraform can be configured to work with multiple remote workspaces. In Terraform Cloud and Enterprise, workspaces allow different state files to be managed under the same backend configuration.
--A single remote backend can support multiple workspaces.
+- In Terraform Cloud and Enterprise, workspaces allow different state files to be managed under the same backend configuration.
 Using terraform workspace select <workspace_name>, you can switch between workspaces within the same backend.
 -Using an S3 backend for Terraform doesn’t automatically mean you (as a user) have access to S3 itself — it depends on permissions.
 
-*The correct answer is A. It can execute Terraform runs on dedicated infrastructure on premises or in Terraform Cloud.
-
 The Terraform remote backend differs from other state backends like S3 or Consul in that it provides the ability to **execute Terraform runs** remotely on dedicated infrastructure, either in Terraform Cloud or on Terraform Enterprise (on-premises). This allows for remote plan and apply operations, unlike backends such as S3 or Consul, which are used solely for storing state files but do not handle the execution of Terraform runs.
 
-Options B and C are incorrect:
-B: The output of terraform apply can still be viewed locally even with a remote backend.
-C: While certain features of Terraform Cloud require a paid subscription, the remote backend itself is available in both free and paid versions.
+- The output of terraform apply can still be viewed locally even with a remote backend.
+- While certain features of Terraform Cloud require a paid subscription, the remote backend itself is available in both free(remote state storage, operations-plan/apply, version control integration) and paid(team access ctrl, policy as code(sentinel), private registry, saml/sso and audit logging) versions.
 
 *A provider configuration block is not always required in every Terraform configuration.
 -If a module relies on a provider passed from the root module, it doesn’t need to declare its own provider block.
@@ -654,11 +627,10 @@ B. terraform apply -target=null_resource.run_script → ❌ Won’t recreate the
 C. terraform validate null_resource.run_script → ❌ validate only checks for syntax errors, it doesn’t run or modify resources.
 D. terraform plan -target=null_resource.run_script → ❌ Just shows what Terraform will do, but won’t force recreation.
 
-*The local-exec provisioner invokes a local executable after a resource is created. This invokes a process on the machine running Terraform, not on the resource.
+*The local-exec provisioner invokes a local executable after a resource is created/destroyed. This invokes a process on the machine running Terraform, not on the resource.
 
-*The remote-exec provisioner invokes a script on a remote resource after it is created.=>  invokes a process on the resource created by Terraform
-
--The remote-exec provisioner invokes a script on a remote resource created by Terraform. It connects to the resource using SSH or WinRM and runs the provided inline or script commands. Here's an example of how you might use it:
+*The remote-exec provisioner invokes a script on a remote resource after it is created/destroyed=>  invokes a process on the resource created by Terraform
+- It connects to the resource using SSH or WinRM and runs the provided inline or script commands. Here's an example of how you might use it:
 
 resource "aws_instance" "example" {
 ami = "ami-0c94855ba95c574c8"
@@ -669,6 +641,12 @@ inline = [
 "echo Hello, World! > /home/ubuntu/hello",
 "chmod +x /home/ubuntu/hello",
 ]
+
+connection{
+host=
+type=
+private_key_file=('')
+}
 }
 }
 
@@ -678,22 +656,19 @@ The file provisioner is used to **copy files or directories** from the machine e
 
 *Providers can be written by individuals - Any person or organization can develop and distribute a Terraform provider, allowing them to expand Terraform's capabilities to manage resources that it previously could not.
 
-B. Providers can be maintained by a community of users - Many Terraform providers are open source projects, and the development and maintenance of these providers can be collaborative efforts between multiple individuals and organizations.
+Providers can be maintained by a community of users - Many Terraform providers are open source projects. 
+Some providers are maintained by HashiCorp - maintain **official providers** such as AWS, Google Cloud, and Microsoft Azure.
+Major cloud vendors and non-cloud vendors can write, maintain, or collaborate on Terraform providers.
 
-C. Some providers are maintained by HashiCorp - HashiCorp, the creators of Terraform, maintain a number of **official providers** that cover popular infrastructure providers such as AWS, Google Cloud, and Microsoft Azure.
+*Workspaces(Community and HCP Terraform versions)- manage multiple environments and configurations.
+-HCP Terraform: remote state management, collaboration tools, and version control integration. Not available in the Community version.
 
-D. Major cloud vendors and non-cloud vendors can write, maintain, or collaborate on Terraform providers - Providers can be developed and maintained by cloud vendors, non-cloud vendors, or a combination of both, to expand Terraform's capabilities and support for different types of infrastructure.
-
-*While workspaces in the Community and HCP Terraform versions of Terraform serve the same purpose of managing multiple environments and configurations, there are differences in how they are implemented and accessed. HCP Terraform offers additional features and capabilities for managing workspaces, such as remote state management, collaboration tools, and version control integration, which are not available in the Community version.
-
-* by default, a child module in Terraform does not inherit all variables set in the calling (parent) module. The parent module must explicitly pass variables to the child module by defining input variables in the child module's configuration. This approach helps maintain clear boundaries between modules and prevents unintended variable leakage.
--A Terraform module (usually the root module of a configuration) can call other modules to include their resources into the configuration. A module that has been called by another module is often referred to as a child module.
+* by default, a child module in Terraform does not inherit all variables set in the calling (parent) module. The parent module must explicitly pass variables to the child module by defining input variables in the child module's configuration - clear boundaries between modules and prevents unintended variable leakage.
+-A Terraform module (usually the root module) can call other modules to include their resources into the configuration. A module that has been called by another module - child module.
 
 When you declare variables in the root module of your configuration, you can set their values using CLI options and environment variables. When you declare them in child modules, the calling module should pass values in the module block.
 
 Example of a module block that has multiple variables passed to it:
-
-
 
 module "server" {
   source          = "./modules/server"
@@ -703,12 +678,12 @@ module "server" {
   security_groups = [aws_security_group.vpc-ping.id, aws_security_group.ingress-ssh.id, aws_security_group.vpc-web.id]
 }
 
-*HCP Terraform can be managed from the CLI by using an API token. The API token serves as a secure way to authenticate and authorize CLI access to HCP Terraform resources and operations.
--A TOTP (Time-based One-Time Password) token is not required for managing HCP Terraform from the CLI. TOTP tokens are typically used for two-factor authentication but are unnecessary for CLI access to HCP Terraform.
+*HCP Terraform can be managed from the CLI by using an API token to authenticate and authorize CLI access to HCP Terraform resources and operations.
+-A TOTP (Time-based One-Time Password) token is not required for managing HCP Terraform from the CLI.(typically used for two-factor authentication)
 
-*When a resource has a tilde (~) next to it in the terraform plan, it signifies that the resource will be updated in place, preserving its current state and making necessary modifications without recreating it.
+*When a resource has a tilde (~) next to it => will be updated in place, preserving its current state and making necessary modifications without recreating it.
 
-*Public modules are managed via Git and GitHub. Publishing a module takes only a few minutes. Once a module is published, you can release a new version of a module by simply pushing a properly formed Git tag. The module must be on GitHub and must be a public repo. This is only a requirement for the public registry. If you're using a private registry, you may ignore this requirement.
+*Public modules are managed via Git and GitHub. Publishing a module takes only a few minutes. Once a module is published, can release a new version using a properly formed Git tag. The module must be on GitHub and must be a public repo.(for public registry not private registry)
 
 The key here is that HashiCorp uses GitHub for published modules.
 -automatically generated documentation
@@ -728,45 +703,23 @@ You can also apply the variable set globally, which will apply the variable set 
 
 Variable sets are constrained to a single organization. You can't create variable sets that can be used across multiple HCP Terraform organizations.
 
-*The 'terraform show' command is used to inspect the current state file in Terraform. It displays the current state as Terraform sees it, including resource attributes and dependencies.
-
-*Using Terraform to interact with sensitive data like secrets from Vault can lead to the secrets being persisted to the state file. This poses a security risk as the state file may contain sensitive information that could be exposed if not properly managed or secured.
+*The 'terraform show' command is used to inspect the current state file(in json) in Terraform. It displays the current state as Terraform sees it, including resource attributes and dependencies.
 
 *Before a new provider can be used, it must be _declared_ and _Initialized_.
 
-Your selection is incorrect
-uploaded to source control
-
-Explanation
 Uploading the provider to source control is not a mandatory step for using a new provider in Terraform. While version controlling providers can be beneficial for collaboration and tracking changes, it is not a prerequisite for using a provider in a configuration.
 
-Correct selection
-declared or used in a configuration file
-
-Explanation
 Declaring or using the new provider in a configuration file is essential for Terraform to recognize and utilize the provider when executing infrastructure changes. This step ensures that the provider is integrated into the configuration workflow.
 
-Your selection is incorrect
-approved by HashiCorp
-
-Explanation
 Approval by HashiCorp is not a requirement for using a new provider in Terraform. Providers can be sourced from various locations, such as the Terraform Registry or custom sources, without needing explicit approval from HashiCorp.
 
-Correct selection
-initialized
-
-Explanation
 Initializing a new provider is a necessary step before it can be used in a Terraform configuration. This process downloads the necessary plugins and sets up the provider for use in the configuration.
 
 *Terraform state provides increased performance by storing the current state of managed infrastructure resources. This allows Terraform to efficiently track changes and manage resources without having to query the cloud provider's API repeatedly.
-
-Terraform state helps in determining the correct order to destroy resources by keeping track of dependencies between resources. This ensures that resources are destroyed in the correct sequence to avoid any issues or errors during the destruction process.
-
-*Terraform state can contain sensitive data, depending on the resources in use and your definition of "sensitive." The state contains resource IDs and all resource attributes. For resources such as databases, this may contain initial passwords.
+- Terraform state helps in determining the correct order to destroy resources by keeping track of dependencies between resources. 
+- Terraform state can contain sensitive data, depending on the resources in use and your definition of "sensitive." The state contains resource IDs and all resource attributes. For resources such as databases, this may contain initial passwords.
 
 When using local state, state is stored in plain-text JSON files.
-
-If you manage any sensitive data with Terraform (like database passwords, user passwords, or private keys), treat the state itself as sensitive data(as this data will be persisted in the state file).
 
 Storing Terraform state remotely can provide better security. As of Terraform 0.9, Terraform does not persist state to the local disk when remote state is in use, and some backends can be configured to encrypt the state data at rest.
 
@@ -778,9 +731,8 @@ Storing Terraform state remotely can provide better security. As of Terraform 0.
 
 *most secure place to store secrets for connecting to a Terraform remote backend:
 -Environment variables → ⚠️ More secure than hardcoding in Terraform files, but still visible in process lists and logs.
-B. Inside the backend block within Terraform configuration → ❌ Least secure, as secrets would be stored in plaintext within version-controlled files.
-C. Defined in a connection configuration outside of Terraform → ✅ Most secure, as it can use secure secret management solutions like AWS Secrets Manager, HashiCorp Vault, or a secure credential store.
-D. None of the above → ❌ Incorrect because option C provides a secure approach.
+-Inside the backend block within Terraform configuration → ❌ Least secure, as secrets would be stored in plaintext within version-controlled files.
+-Defined in a connection configuration outside of Terraform → ✅ Most secure, as it can use secure secret management solutions like AWS Secrets Manager, HashiCorp Vault, or a secure credential store.
 👉 Best practice: Use a secrets manager or an external credentials file outside of Terraform for maximum security. 
 
 *Terraform tracks resources in its state file, not by querying the cloud provider directly.
@@ -797,7 +749,6 @@ When you run terraform apply, Terraform will detect that the VM is missing and r
 -terraform plan -out=plan.tfplan
 terraform apply plan.tfplan
 -> the plan.tfplan file is not automatically updated in future runs. It’s a snapshot of the plan at the moment it was created. Run again to get a fresh plan that reflects new changes.
-
 
 *The expressions in local values are not limited to literal constants; they can also reference other values in the module in order to transform or combine them, including variables, resource attributes, or other local values:
 -locals {
@@ -858,10 +809,7 @@ resource "aws_vpc" "shared" {
 -to define the cidr_block for us-east-1 in the aws_vpc resource using a variable? var.vpc_cidrs["us-east-1"]
 
 *You have defined the values for your variables in the file terraform.tfvars, and saved it in the same directory as your Terraform configuration. Which of the following commands will use those values when creating an execution plan?
-
-🔘 terraform plan
-🔘 terraform plan -var-file=terraform.tfvars
-🔘 All of the above(Answer)
+- terraform plan & terraform plan -var-file=terraform.tfvars
 
 * Terraform commands will automatically refresh the state unless supplied with additional flags or arguments? plan and apply
 
@@ -869,34 +817,29 @@ resource "aws_vpc" "shared" {
 -Terraform makes any infrastructure changes defined in your configuration.
 -Terraform updates the state file with any configuration changes it made.
 
-*to get help with a cmd use:
-✅ -h
-✅ -help
-✅ --help i.e, terraform plan -h, --help, -help
+*to get help with a cmd use: terraform plan -h, --help, -help
 
-*Both terraform cloud(team and governance, business tiers) and enterprise support policy support policy of code(sentinel)
+*Both terraform cloud(team and governance, business tiers) and enterprise support policy as code(sentinel)
 
 *nested blocks == dynamic blocks
 
-*audit logging not avail for terraform cloud free trail(it allows remote backend, private reg, policy as code)
+*audit logging not avail for terraform cloud free trial(it allows remote backend, private reg, policy as code)
 
 *terraform state [options]: cant refresh the state(plan, apply, destroy CAN)
 
 *terraform fmt -check -recursive: to check all code in a config with multiple modules for proper format without making any changes.(all sub dirs also). 
 
-*store secrets securely for connecting to a tf remote backend: defined in env vars, in a cxn config outside of tf, can do in var file(less secure)
+*store secrets securely for connecting to a tf remote backend: in a cxn config outside of tf, defined in env vars, can do in var file(less secure, logged into state file)
 
-*adding new resource to tf, didn't mention ver constraints, have a .terraform-lock.hcl file - tf uses the ver in lock file 
+*adding new resource to tf, didn't mention ver constraints, have a .terraform-lock.hcl file(traks versions of providers not modules) - tf uses the ver in lock file 
 
 *don't need to use diff cmds with diff tf providers
 
 *tf binary version and providers versions need not match in a single configuration
 
-*.terraform-lock.hcl file- traks versions of providers not modules
-
 *you can create a custome provider to  manage its resources using tf
 
-*delete resources manulaly- then remove resource defs from your file and run terraform apply -refresh-only to reflect this in terraform
+*delete resources manulaly- then remove resource defs from your file and run terraform apply -refresh-only to reflect this in terraform state.
 
 *When you add a data block to your configuration, Terraform will retrieve all of the available data for that particular resource. It is then up to you to reference a specific attribute that can be exported from that data source.
 ->data "aws_ami" "amzlinux2" {
@@ -907,7 +850,7 @@ resource "aws_vpc" "shared" {
     name   = "name"
     values = ["amzn2-ami-hvm-*-x86_64-ebs"]
   }
-} => The data block "aws_ami" with the specified filters will return all possible data of a specific Amazon Machine Image (AMI) from AWS that matches the criteria set in the configuration. This includes information such as the AMI ID, description, architecture, root device type, and more.
+} => The data block "aws_ami" with the specified filters will return "all" possible data of a specific Amazon Machine Image (AMI) from AWS that matches the criteria set in the configuration. This includes information such as the AMI ID, description, architecture, root device type, and more.
 
 *Although main.tf is the standard name, it's not necessarily required. Terraform will look for any file with a .tf or .tf.json extension when running terraform commands.
 -> The main.tf file is used to define the primary configuration for Terraform resources, but Terraform allows for flexibility in file naming and organization. Other file names can be used to define resources as long as they are referenced correctly in the Terraform code.
@@ -942,13 +885,13 @@ resource "aws_vpc" "shared" {
   servers = 4
 } -> the `servers = 4` line in the code snippet refers to the value of an input variable named `servers`.
 
-*While IaC does enable the deployment of the latest features and services, it is not a universal guarantee. The ability to deploy the latest features and services depends on the implementation and configuration of the IaC scripts and the availability of those features and services in the cloud provider.
+*While IaC does enable the deployment of the latest features and services, it is not a universal gurantee. The ability to deploy the latest features and services depends on the implementation and configuration of the IaC scripts and the availability of those features and services in the cloud provider.
 
 *The TRACE log level in Terraform is the most verbose level, providing the most detailed and specific logs.
 ->The DEBUG log level in Terraform provides detailed information about the actions taken by Terraform, but it is not as specific or detailed as the TRACE level.
 ->The INFO log level in Terraform provides general information about the actions taken by Terraform, such as resource creation and updates. It is less verbose than the DEBUG and TRACE levels(more of an overview)
 ->The ERROR log level in Terraform only logs critical errors and issues that prevent Terraform from completing an operation successfully. It does not provide detailed information about the actions taken by Terraform, making it less verbose compared to the TRACE and DEBUG levels.
--> define format: TF_LOG_FORMAT=json
+-> define format: TF_LOG_FORMAT=json, export TF_LOG=info, error, trace, debug, warning(log levels)
 
 *IAC- consistent, repeatable, idempotent, predictable
 
@@ -980,10 +923,6 @@ resource "aws_vpc" "shared" {
 ->agents can interact with state files during execution, primary role not state mgmt. tho
 -> agents can be used to gather information for troubleshooting, their core function is not dedicated monitoring.
 
-*A data source in Terraform enables the configuration to fetch data from an external source, such as an API or a cloud provider, to be used elsewhere in the Terraform configuration. This allows Terraform to dynamically retrieve information needed for resource provisioning.
-
-*detect any drift from the last-known state - terraform apply -refresh-only
-
 *The .tfvars file is used to set explicit values for variables in Terraform. can override the default variable values declared in main.tf or variables.tf. 
 
 *Terraform would use the existing module already downloaded because once a specific version is downloaded, Terraform caches it locally. If the version parameter is removed, Terraform will continue to use the cached version unless explicitly updated.
@@ -1007,8 +946,7 @@ integrated services, such as AWS IAM or Azure Managed Service Identity
 -> env vars, creds file
 -> not directly in a config file, remote system or as a variable
 
-*Running a `terraform fmt` command will only format the Terraform configuration files in the current working directory, not in all subdirectories. This command is used to standardize the formatting of Terraform code for consistency and readability, but it does not automatically apply to all directories within the project.
-
+*Running a `terraform fmt` command will only format the Terraform configuration files in the current working directory, not in all subdirectories. 
 Use the -recursive flag to also process files in subdirectories. By default, only the given or current directory is processed.
 -> **terraform fmt -recursive**
 ->terraform fmt -check -recursive
@@ -1024,9 +962,6 @@ Which of the following code snippets would satisfy these requirements?
   description = "Outputs the URL of the provisioned website" 
   value       = "https://${module.web.public_dns}:8080/index.html"
 }
-
-*adding a provider block is not a necessity, it is recommended tho
-->Unlike many other objects in the Terraform language, a provider block may be omitted if its contents would otherwise be empty. Terraform assumes an empty default configuration for any provider that is not explicitly configured. In other words, if you don't have any specific configurations for your provider, you may indeed leave it out of your configuration.
 
 ->To prove this out, I created a .tf file that includes a resource from the RANDOM provider as well as the AWS provider and omitted any provider blocks in my configuration. After running a terraform init, you can clearly see that Terraform understands what providers the resources are from and downloads the correct provider plugins. Thus proving that you do NOT need a Provider block to use Terraform.
 
@@ -1101,6 +1036,7 @@ some ways you can protect the state file?
 
 *When using modules, it's common practice to declare variables outside of the module and pass the value(s) to the child module when it is called by the parent/root/calling module. However, it's perfectly acceptable to declare a variable inside of a module if you needed. Any variables declared inside of a module are only directly referencable within that module. You can't directly reference that variable outside of the module. You can, however, create an output in the module to export any values that might be needed outside of the module.
 
+*export TF_LOG=TRACE - logging set to trace
 *export TF_LOG_CORE=TRACE - Core logging
 ->provider specific bug report - export TF_LOG_PROVIDER=TRACE
 ->create the specified file and append logs generated by Terraform.- export TF_LOG_PATH=logs.txt
@@ -1127,7 +1063,7 @@ resource "aws_instance" "example" {
 ->This runs commands on the EC2 instance after it's created.
 
 *Provisioner:
-Used to run actions on a resource after it's created(create time provisioner)(or sometimes before destroy(create time provisioner)).
+Used to run actions on a resource after it's created(create time provisioner)(or sometimes before destroy(destroy time provisioner)).
 
 Examples of what you can do:
 Install software (remote-exec)

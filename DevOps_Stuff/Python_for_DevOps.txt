@@ -17,11 +17,12 @@ variable ops, system admin tasks, cli interaction) for only Linux
  
 - Package: a collection of modules, py packages hub- PyPI: python package index, install using: pip install <package>, open source contribution
 #pip list: to see all the installed packages
+
 # Always setup a virtual env for py: <<python -m venv .venv>>(-m implies calling a module), then install packages and modules, creates a logical isolation for your projects on your machine
 - install venv: pip install virtualenv
-
-- python -m venv proj-abc # do ls -ltr to see the disk space for proj-abc
-  source proj-abc/bin/activate - to use this logical separation
+- python -m venv proj-abc # do ls -ltr to see the disk space for proj-abc,  same as python -m venv .venv
+  # just names of seperation proj-abc and .venv(this is convention to mark and hide the virtualenv dir)
+  source proj-abc/bin/activate or source .venv/bin/activate -> to activate and use this logical separation
   deactivate - to come out of the env
 
 - input from cmd line: python reads as string
@@ -29,10 +30,22 @@ variable ops, system admin tasks, cli interaction) for only Linux
 # sys.argv[0] is the name of the script itself.
 # sys.argv[1] is the first argument passed to the script. Similarly arg[2],[3] so on
 
-- set env vars: export name="jithu"
-  #inside program: use os module
+# same stuff in linux:
+ bash args.sh hello world > $0 first arg(hello), $1 2nd arg(world), $@ => all args as a list, $# => no of args(2 here)
+
+#inside program: use os module
+     (In shell)     
+     export name="jithu"
+     python script.py
+
+     (in script)
      import os
      print(os.getenv("name")) or name = os.getenv("name")
+
+#Action	                          Bash	                                  Python
+Set env var	                export name="jithu"	               os.environ["name"] = "jithu"
+Read env var	                    $name	                             os.environ["name"]
+Safe read with fallback	    echo ${name:-default}	             os.environ.get("name", "default")
 
 -  is: identity operator => a is b : gives true or false
 
@@ -42,7 +55,8 @@ variable ops, system admin tasks, cli interaction) for only Linux
 my_dict = {'name': 'John', 'age': 25, 'city': 'New York'}
 
 #use "get" for safer navigation through dict
-response= my_dict.get(person, {}).get('age', 'person not found') => safer way incase the "person" doesn't exist
+response= my_dict.get(person, {}).get('age', 'person not found') => safer way incase the "person" doesn't exist, checks for dict person if not there gives empty dir {}
+if there, from the inner dict checks fro value og 'age', found gives value else says person not found
 in dict. my_dict[person].get('age', 'person not found') => will return error if key not found.
 
 #modify the dict
@@ -50,7 +64,7 @@ my_dict['age'] = 26  # Modifying a value
 my_dict['occupation'] = 'Engineer'  # Adding a new key-value pair
 
 #delete entry
-del my_dict['age'] => key in ""
+del my_dict['age'] => key in ''
 
 #check key there
 if 'age' in my_dict:

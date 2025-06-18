@@ -30,10 +30,10 @@ then do: git push origin <branch-name>
 
 xargs- It takes input (usually a list) and passes it as arguments to another command.
 
-ls *.txt | xargs rm
+ls *.txt | xargs rm => rm doesn’t read input from stdin (the output of ls), so needs xargs
 This means:
 
-ls *.txt: lists all .txt files
+ls *.txt: lists all .txt files 
 
 xargs rm: passes those file names as arguments to rm, like:
 

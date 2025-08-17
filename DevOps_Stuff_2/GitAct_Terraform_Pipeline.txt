@@ -38,3 +38,7 @@ jobs:
         if: github.ref == 'refs/heads/destroy'
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform destroy -auto-approve
+
+# Push/merge into main branch → terraform apply runs.
+  Push into destroy brqanch → terraform destroy runs.
+  👉 Typically, people create a special destroy branch only when they want to tear down the infrastructure.

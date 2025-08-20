@@ -140,6 +140,14 @@ or
  }
 }
 
+Feature	                 count	                               for_each
+Type	                Integer-based	                        Map or Set-based
+Use Case	   When you want N copies of a resource	    When you want to iterate over a map or set
+Indexing	             count.index	                       each.key and each.value
+Flexibility	    Less flexible with complex data	        More flexible with named elements
+Example	               count = 3	                      for_each = toset(["a", "b", "c"])
+
+
 provisioner - local exec to run on machine with tf binary, remote exec to run on provisioned resources(both inside resource blk, run after the resources are created- default type, create time provisioners, there's also file type provisioner
 use these as last resort, prefer user_data
 provisioner remote_exec {
@@ -1255,3 +1263,4 @@ Note that aws_s3_bucket.company_data is an explicit dependency for the aws_insta
 
 *block type should you use to incorporate this existing resource into your Terraform configuration
 -> Import and resource blocks
+

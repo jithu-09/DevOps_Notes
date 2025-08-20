@@ -85,6 +85,12 @@ Solution? → Cloud-agnostic tooling + automation + IaC + centralized observabil
 - smart router that manages external access to multiple services using a single(central) entry point. Ideal for web applications with multiple services (e.g., /api, /shop, /admin) - Multi-tenant setups
   - Path-based and host-based routing, SSL termination and TLS support. Cost-effective, more complex to configure, needs ingress controller.
 
+#path-based : both Delegates path matching logic to the Ingress Controller
+ - prefix: Matches all paths that start with the specified path( /api, /api/v1, /api/users) - most common and predictable
+ - Exact: Matches the path exactly as specified(If you define /api with pathType: Exact, it matches: /api
+Does not match /api/v1 or /api/users - no subpaths only specific path)
+ - custom: Behavior depends on the Ingress Controller (e.g., NGINX might treat it like Prefix).
+
 Helm
 
 Helm v3 introduces a lot of changes that are not backwards compatible with Helm v2. 

@@ -78,7 +78,12 @@ What challenges do you face in deploying CI/CD Pipeline across a multicloud envi
 Solution? → Cloud-agnostic tooling + automation + IaC + centralized observability.
 → Code → Git → CI Pipeline → Build Artifact → Push to Universal Repo → Deploy via GitOps → Multi-cloud Clusters
 
+#svc type loadBalancer vs Ingress
+- LB: Best for simple, direct access to a single service (e.g., a backend API or frontend app).
+  -Each service needs its own load balancer (can be costly). Limited routing capabilities (no path-based or host-based routing).
 
+- smart router that manages external access to multiple services using a single(central) entry point. Ideal for web applications with multiple services (e.g., /api, /shop, /admin) - Multi-tenant setups
+  - Path-based and host-based routing, SSL termination and TLS support. Cost-effective, more complex to configure, needs ingress controller.
 
 Helm
 

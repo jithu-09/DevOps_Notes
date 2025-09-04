@@ -1,0 +1,12 @@
+MCP - what is it?
+
+- Model context protocol
+- Why needed? 
+  -> S/w engs when need to do bigger tasks: make use of APIs
+  -> Use a rest client(postman etc) or write a code to interact with rest api of app via http protocol(std way)
+  -> they have context, missing for AI agents => solved using MCP
+- How?
+  -> Prompt to mcp client - uses mcp protocol - sent to mcp server( dev by app )
+- Mcpservers repo: github-mcp-server
+- follow doc in GitHub to use it particular server
+- when using GitHub mcp server from vs code, copilot is the mcp client not vscode

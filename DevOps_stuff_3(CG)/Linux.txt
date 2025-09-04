@@ -1,0 +1,93 @@
+Linux
+
+cgroup- control group, Linux kernel feature
+
+What it does: Controls how much system resources a group of processes can use.
+Why it's useful: Helps in managing system performance, especially in containers (like Docker), multi-tenant systems, or servers running many services.
+Key features:
+- Resource limiting (e.g., max memory or CPU)
+- Prioritization (e.g., give more CPU to critical processes)
+- Accounting (track resource usage)
+- Isolation (separate workloads)
+
+#easy way to start using PostgreSQL in container environments:
+docker run --name pg-test -e POSTGRES_PASSWORD=mysecretpassword -p 5432:5432 -d postgres
+psql -h localhost -U postgres
+
+# rsync -avz /app/ user@server:/backup/
+- to Efficient file syncing and backup — much faster and more reliable than scp for large directories.
+- take backup of contents of /app directory(/app/ means its contents not the directory itself) in local to a remote server user@server under /backup/
+- -a: Archive mode - Preserves symbolic links, permissions, timestamps, and directory structure. Essentially ensures the copy is as close to the original as possible.
+-v: Verbose mode - Displays detailed output of the transfer process.
+-z: Compression - Compresses file data during the transfer to reduce bandwidth usage.
+- This command securely and efficiently copies all contents of /app/ from your local machine to /backup/ on the remote server server, logging in as user. It maintains file attributes and compresses data during transfer.
+
+echo shell - /bin/bash
+
+create - /tmp/asia/india(asia and inida folder not present)
+
+single cmd- mkdir -p /tmp/asia/india (creates all the dirs. which are not present in the path)
+
+rm -r <dir path> : delete recursively in that path
+cp -r < source dir path> <dest dir path> : copy recursively to that path
+
+write to a file w.o vim or nano: cat > <file name>, after you are done predd ctrl + D
+
+in vi editor:
+
+bsc or x to delete a char, dd to delete a line
+yy to copy a line , past using p
+scroll up: ctrl+u, down: ctrl+d
+:w <filename> - to give a name
+/<word> : to find a word
+move through the occurences: n
+whoami: user
+id: userid, groupid of user also group
+su <username>: switch user
+ssh <user>@<ip>
+
+curl <url> -O: to save it to a file else will print on screen
+wget <url> -O <filename>: to specify the file name u want to save as
+ls /etc/*release* , cat /etc/*release* : to check os vers
+
+Centos uses - RPM (Red Hat package manager) - .rpm is the package
+install rpm -I FILE.RPM
+rpm -e <package>: uninstall
+rpm -q <package>: query
+
+Yum: high level package manager, uses rpm underneath - searches s/w repo locally or on internet to install the req s/w(req packages, dependencies, and in order)
+
+yum list <s/w>: shows all installed packages of <s/w>
+yum remove <s/w>
+yum --showduplicates list <s/w>
+yum install <s/w>-<ver>
+
+rpm -q openssh-server python3 ansible telnet
+output:
+- openssh-server-8.7p1-44.el9.x86_64
+- python3-3.9.21-1.el9.x86_64
+- package ansible is not installed
+- telnet-0.17-85.el9.x86_64
+
+any s/w that runs as service at background, works as service in Linux: service <svc name> start: to start it
+use: systemctl under the hood
+can also use: systmcl start/stop/enable/status/disable httpd 
+
+to make your app as a service: 
+got to /etc/systemd/system:
+create a unit file for your app, say: myapp.service(myapp will be the name given to your app going frwd)
+add in it:
+[service]
+ExecStart=<cmd to run your app>(ex: /usr/bin/python3 /opt/code/my_app.py)
+ExecStartPre
+ExecStartPost => these to run scripts pre or post start of app
+Restart= always => auto starts when crashes
+
+[Install]
+WantedBy=multi-user.target => start app on boot
+and save it
+
+you can do:
+systemctl daemon-reload
+systemctl start my-app
+systemctl stop my-app

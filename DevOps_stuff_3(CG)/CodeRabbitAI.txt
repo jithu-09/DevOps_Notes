@@ -1,0 +1,7 @@
+Code review using CodeRabbitAI:
+
+- VScode extension
+- Can review committed and uncommitted changes
+- Can install it as app for all repo in GitHub => will do review auto when a pull request is received, will also give summary of the pull request.
+- Can see all suggestions and potential issues in "file changes" section, gives changes that can be used instead for those.
+- can create issues for any issues or suggestions given by it for a pull request

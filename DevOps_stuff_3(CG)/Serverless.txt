@@ -1,0 +1,24 @@
+Serverless
+
+Sam CLI- AWS native tool to build serverless app and infra(app and infra deployment tool)
+         Use cloudformation under the hood
+         resources like lambda, dynamodb, api gateway, xray, cognito
+         can build a package for an app written in nodejs, java, go, py etc
+         sam deploy(use cloud formation) will build the infra- can build various envs like staging, prod
+         once infra is ready, it configure the envs as well and deploy the app onto the envs as well.
+
+Jenkins
+
+The pipeline stages are designed to work sequentially, with each stage building upon the output of the previous stage. This ensures that the necessary context and artifacts are available for each subsequent stage
+
+Reverse proxy
+
+- Basically a middleman
+- Sits inbtw webservers and clients, does load balancing(distributes traffic to multiple servers, perf and reliability improve), caching(often used in CDNs -> web acceleration), central authentication(making auth simpler), compresses client request before sending thus reducing bandwidth usage, security(hides backend identity, can do SSL termination also- does SSL encryption and decryption, reduces load on backend servers)
+- client sends a req(client request), RP receives it and sends to appropriate backend(request handling), backend sends response to RP(server response), RP sends it to client(response delivery)
+-EX: NGINX(logs everything), HAProxy, Apache HTTP Server
+
+Rate limiting 
+
+- Is a technique used to control the amount of incoming or outgoing traffic to or from a network, application, or API. It helps prevent system overload, abuse, and attacks like Distributed Denial of Service (DDoS).
+- Ex: CDNs, web apps, API

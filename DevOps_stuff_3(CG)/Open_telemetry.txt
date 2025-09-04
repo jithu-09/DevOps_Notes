@@ -1,0 +1,65 @@
+Open telemetry
+
+OPEN TELEMETRY: Vendor and tool-agnostic - CNCF: Cloud Native Computing foundation - It is a data collection tool, integrates with observability platforms
+#The Cloud Native Computing Foundation (CNCF) is an open source, vendor-neutral software foundation that promotes the adoption of cloud-native computing. Provide support, oversight and direction for fast-growing, cloud native projects like k8s, Istio, open telemetry, Prometheus etc
+- OpenTelemetry is a toolkit for collecting and exporting data, but it requires configuration and integration with other systems. It doesn’t automatically provide out-of-the-box monitoring or alerting functionality.
+- Open Telemetry supports delta metrics, which represent the change since the last measurement.
+- Instead of reporting a "total count", it reports "how much" has changed since the "last export".
+- This is useful for systems that push metrics (like Open Telemetry exporters) rather than being scraped.
+- Open Telemetry is an open-source observability framework for Instrumenting, generating, collecting, and exporting telemetry data (traces, metrics, logs).
+- Open Telemetry offers a unified standard for observability across multiple tools and vendors, unlike other libraries that may focus only on a specific aspect like tracing or metrics.
+- Main goal: Enable easy instrumentation of your applications and systems, regardless of the programming language, infrastructure, and runtime environments used.
+- Moving applications from one observability stack to another is not difficult as instead of hardcoding specific tool apis and sdks, you use open telemetry apis & sdks, open telemetry also has exporter where you can define to export the metrics to a particular backend, similarly with traces and logs => only change here is required when changing stack(lot of tools accepted it as a standard).
+
+application -> open telemetry api/sdk -> otel receiver -> otel processor -> otel exporter(config end platform here, no need to modify this -> target platform 
+
+TWO important components of observability:
+- Instrumentation of metrics: instrumenting metrics, traces, logs in source code
+- Implementing observability: setting up k8s cluster, observability stack like prm+grafana, open telemetry etc
+
+OpenTelemetry Signal Specification:
+To provide a consistent, language-agnostic method of collecting telemetry data
+
+Semantic Conventions in OpenTelemetry:
+A set of rules for organizing and labeling telemetry data consistently
+
+How does Vendor-Agnostic Instrumentation in OpenTelemetry benefit developers?
+It supports both automatic and manual instrumentation across different programming languages
+
+#Types of metric you use in your org:
+- Prometheus:
+  -> Infra metrics - Node exporter for this: node cpu usage(cpu_totalSeconds), mem avail, disk i/o, ntwl traffic related metrics
+                   - Kube-state metrics: Container mem usage, cpu usage, restarts(kube_pod_container_status_restarts), pod status, node status and stuff 	             about other k8s comps
+                   - app metrics- http request total, req duration, db performance queries, and any other critical app metrics( feature_toggle_usage - to       	             understand feature adoption)
+
+- Devs add logs to apps using logging frameworks like log4j: they add info, warning, error, debug logs to the app.
+
+- logs: understand what happened with timestamps (ELK)
+  metrics: gives historical numeric data about certain aspects of the infra, app etc that you want to know about. (Prom + Graf)
+  traces: helps to identify bottlenecks or pinpoint issue by following the request flow from one point to another. (Jaeger)
+  #for instrumentation of traces, logs, metrics - opentelemetry
+
+- pull based monitoring: metrics are scraped from a target endpoint. Ex: Prometheus, easier to config and powerful
+  push based monitoring: metrics are pushed to the tool from the target. Ex: statsd, telegraf
+
+- app slowness: no logs, cpu is good, steps>:
+  -> check logs in debug mode, double check
+  -> check request time metric to see delta btw ideal and current value
+  -> trace the request, see if any issue with db, check db logs, backend, all the svc involved in the process, could fail at one of the intermediary svcs, cant tell unless you see that svc's logs.
+
+- Distributed tracing: tracing the request flow among multiplke microsvcs
+  -> to do so:
+     - using traceID instrumented using OTel by devs(mostly), request goes through multiple hops(msvcs), at each hop this id is gen along with span(duration the request spent with that msvc) and these are sent to the next hop.
+     - this info can be collected to identify where the issue is happening. Can use tools like jaegar.
+
+- OOMKILLED for a pod, troubleshoot this way:
+  -> run kubectl get pods: confirm the status of the pods
+  -> describe the deployment used: check limits and requests
+  -> check memory usage for the app: in prom using defined metrics
+  -> if historically using close to the limit: increase the limit
+  -> if one time crashout: share the logs with devs to diagnose the issue, try to recreate the scenario to give more info to the devs
+  -> deploy the new version of app after the devs make changes.
+
+- Handle false alarms?:
+  -> alert tunning: if certain cpu % sustained for a longer period(5,10mins or more) then send an alert
+  -> slo based: if certain % of errors as per SLOs defined are sustained for a loner period, then send an alert

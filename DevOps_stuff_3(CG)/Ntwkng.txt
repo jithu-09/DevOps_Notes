@@ -1,0 +1,42 @@
+Ntwkng
+
+- two machines on cloud, for comms, use a switch - this creates a ntwk for their comms
+  - each one is connected to the switch via interface(phy/virt)
+  - ip add will be assigned to the machines using the same network of switch => these two steps allows both of them to comm, within the network only not    
+outside
+ - this outside comms is done through - Router=> it will be assigned with two ips one for each ntwk
+ - But this is not enough, you need gateways there will be many routers and systems need to know which router can comm with them
+  => on system trying to reach system in other ntwk, do ip route add <dest sys ip> via <router ip in current ntwk>
+    - This tells current sys that it can reach the other system via the router 
+    - This needs to be done on all systems which need to comm with others in diff networks
+
+or, instead of adding all the dest servers, you can do:
+ ip route add default via <router ip> => any unknown dest server, use the router to comm
+ - can give 0.0.0.0 instead of default
+
+## all these changes are only valid till restart, to persist them add them to /etc/network_config file
+
+route- c,d to see kernel ip route table
+
+to associate an ip with a name
+can do it in : /etc/hosts
+<ip>   <name>  => this is name resolution - first checks internal etc/hots and then dns server
+
+- this can get messy when no of servers and names given to them increases
+  => DNS server is used for this : Domain name system server 
+  - we point our host to dns server
+    => add dns server in /etc/resolv.conf
+       nameserver      <ip> => it can do all the resolutions from here => only one source to change
+
+=> incase you want to reach servers not present in etc/hosts or dns server?
+  - you can point the dns server to the public nameserver on the internet
+
+wwww.fb.com - this is a domain name
+here,
+. - root
+.com - top level domain
+fb - is the domain name given to facebook(just ex)
+www - is a subdomain => domain can have subdomain and subdomain can have subs and so on based on need
+
+ping, nslookup to test dns name resolution
+dig also, gives more details

@@ -1,0 +1,116 @@
+Prometheus: main purpose -scrap the metrics(pull based)
+# Prometheus typically works with cumulative counters. These are metrics that only increase over time (or reset to zero on restart). 
+  Scrapes the "current value" at regular intervals, calculates the rate of change.
+- Primary sources:
+   # Can be statically in prom config file:
+     - job_name: "node"
+       static_configs:
+       - targets:
+         - "localhost:9100"
+ or prom can talk to svc discovery mechanism
+  -> Node exporter: collects info about k8s nodes(cpu, memory etc), runs as a pod on your k8s cluster. Infra part on cloud
+                    In case of cluster in AWS, it scraps metrics of ec2 instances(nodes in this case).
+  -> Kube-state metrics: runs on k8s cluster as a pod, talks to API server of k8s cluster, collects info periodically about pods, deployments
+                         , deployments status, services, ingress, config maps etc
+  -> Custom metrics: configured based on applications(instrumentation of metrics) 
+  # Need to know how to configure these exporters in the cluster.
+  #They need to expose an http endpoint that serves text based metrics transfer format that prom understands
+
+- Prometheus server:
+ -> "Retrieval": This modules handles collecting data from these exporters endpoints(ex: /metrics on node exporter)
+ -> Stores these metrics in a "time series database(tsdb)": Metrics/data along with timestamp
+ -> "http server": Promql allows to talk to a Prometheus component called http server, which queries data stored in tsdb
+
+This Data can be sent to: 
+- Alert manager: To send alerts as configured based on certain metrics
+- Grafana UI: for visualization
+- Remote storage: Forward samples to it
+
+This data has:
+- Series identifier: Metric name + labels(in {})[ex: http_requests_total(metric name){job="nginx", instance= "10.0.0.2:80}(labels)] and samples[timestamp + values matching the metric and labels]
+
+This data can be manipulated using PromQL.
+
+# curl <clusterip>:<port>/metrics : will give all the metrics collected at metrics endpoint for an exporter
+
+- pod yaml run -> api servers listens to it -> scheduler scouts for node to create the pod -> kublet then create the pod
+
+- kube-state-metrics continuously watches api server, collects this info about pods, keeps the info on "/metrics" endpoint
+#cpu, memory, disk utilization, pod restarts, init containers, no of secrets etc can be some of the metrics to mention in interviews.
+
+Types of metrics:
+- Gauge: goes up and down
+- Counters: only up, unless process that counter tracks restarts then counter reset happens(rate of inc/dec more useful than abs value)
+  rate of increase tracked using these funks(need at least two values):
+  > rate(): per-sec(smoothened) - predictable, best option
+  > irate(): per-sec(un-smoothened), considers only last two samples
+  > increase(): absolute value(smoothened)
+- Summary: Track distribution of requests or other numeric values as a percentile or quantile(as called in prom) 
+- Histograms: same as summary but deal with range buckets, does the same percentile stuff but in range buckets defined, each bucket has counts of prev lower range buckets
+
+#Metric name itself gives latest value - instant vector selector(one sample at one timestamp)
+- Can give label matcher also:
+  -> equality matcher: =, !=, =~, !~(last two are regex matchers - entire string match)
+- Query lookback delta: default duration prom chooses to w.r.t current timestamp or given one to display samples of a timeseries in the past
+- Range vector selector: metric_name[duration]- this can't be graphed, have to feed it to a funk, ex: rate
+- Offset: to specify a shift to the past ex: 2m, 5m etc
+- at modifier: metric @ <timestamp to the sec> or use start() or end()
+
+#prom also creates metrics for each scrap it does - synthetic metrics. Ex: UP: tells if scraped the metric(1- success, 0- fail), "scrape_" metrics
+
+Grafana: Visualization platform, Better dashboard than prom, compatible with lot of data sources, can implement authentication & authorization through sso etc, can define roles who can access what dashboards, some dashboards are already setup.
+
+##Both deal with *METRICS*: explains what is the state of the system
+
+- Logging: messages by dev explaining what is happening and why is it happening
+ -> EFK/FEK(Elasticsearch-db, fluent bit-reads logs, Kibana-visualization): centralized logging system
+    
+    # when you install the EFK stack (Elasticsearch, Fluent Bit, and Kibana) on your Kubernetes cluster, Fluent Bit can automatically discover and collect logs from your pods and services, but this depends on how it's configured.
+  
+   - fluent bit: deployed as daemon set, on each node its on, reads all logs on the node, sends to elasticsearch => if you have x nodes cluster, you will have x fluent bits respectively for each of those x nodes. "Vendor neutral"
+     #fluent bit values yml: service, input, output, filters.
+     Feature	                             Fluent Bit Support
+     Pod log collection	                            ✅ Yes
+     Pod metadata (name, namespace, labels)	    ✅ Yes
+     Service discovery	                            ⚠️ Indirect (via labels/annotations)
+     Auto-detection of new pods	                    ✅ Yes (via DaemonSet)
+     
+     #Log Source: Fluent Bit typically reads logs from the container runtime log files (e.g., /var/log/containers/*.log), which are symlinked to the actual pod logs.
+
+     - elastic search- db, logs stored here, made as a persistent volume, attached to volumes like ebs, can take snapshots etc
+     - kibana- visualization of logs
+ -> ELK(logstash): Little superior as logstach along with collecting, you can filtering, labelling and more actions before forwarding to 			   elastic search. Can become a bottleneck if say elastic search is replaced
+
+ -> CSI driver: when creating a persistent volume of type ebs using a pvc, you need CSI driver for you to create it.
+
+Avoid this stuff in prom:
+- Each unique set of labels => create new timeseries in prom that needs to be stored and processed, can overwhelm/lead to bottlenecks in prom if these are
+ not used judicially
+  -> use labels with small and well-bounded set of values( avoid userids, emails, http path in labels) - prom has a budget of timeseries it can hndle once(large but need caution)
+
+- Don't send alerts for each timeseries but aggregate them and then send alerts for those groups
+- Scope your metric to req job or other label to get accurate results from them and not from other jobs sending the same metric
+ ex: rate(error_rate[5m]) > 10 and rate(error_rate{job="demo"}[5m]) > 10 are diff and the later is more scoped
+- add "for" duration to your alerting rules to make them robust and protects against gappy data:
+  ex:
+    alert: HighErrorRate
+    expr:  rate(error_rate{job="demo"}[5m]) > 10
+    for: 5m # this could lead to slower reaction time, need to find balance by testing diff cases
+- Keep rate window in metric >=4 times the scrape interval. ex: scrape interval is 15 sec and if rate interval is around 14-16sec => rate func may not give proper results as they will need atleast two points for cal and with these they either don't get one also or  just one
+- Prom can't tell if you are passing correct metric to a func
+ 
+-Node exporter module to expose Linux host custom metrics
+ -> node exporter has "textfile" collector module: Allows to include custom metrics from a set of text files. These files shld have metrics in the sam etext-based format that prom uses during scrape, shld end with .prom suffix => node exp will include these metrics with it's metrics at the endpt it exposes(/metrics).
+#node-exporter-textfile-collector-scripts GitHub repo
+
+-Relabelling: allows to manipulate the labelling for metrics, samples using some rules(based on the case) in prom config file(Prometheus.yml)
+ -> relabelling for targets, metrics, alerts and remote writes etc.
+ -> has action field that tells: to relabel or drop a metric/target as they pass through resp. rules.
+#promlabs -Julies
+# after relabelling, hover over target label in prom dashboard under targets in status tab to get labels before relabelling
+  also in svc discovery under same tab
+
+#prom histogram as Grafana heatmap:
+ - panel, select type on right side a s heat map, give prom label and change format below to heatmap from timeseries
+   select unit as seconds on y-axis
+   in heatmap: bight colour => more requests

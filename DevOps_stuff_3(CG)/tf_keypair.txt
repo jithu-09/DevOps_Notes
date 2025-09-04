@@ -1,0 +1,100 @@
+#tf file to create keypair and save pvt key in local
+
+resource "tls_private_key" "example" {
+  algorithm = "RSA"
+  rsa_bits = 4096  # Or another desired key size
+}
+
+resource "aws_key_pair" "example" {
+  key_name   = "nautilus-kp"
+  public_key = tls_private_key.example.public_key_openssh
+}
+
+resource "local_file" "private_key" {
+  content  = tls_private_key.example.private_key_pem
+  filename = "/home/bob/nautilus-kp.pem"
+}
+
+resource "aws_vpc" "datacenter-vpc" {
+    cidr_block = "10.0.0.0/16"
+    enable_dns_support = true
+    enable_dns_hostnames = true
+     
+    tags = {
+        Name = "datacenter-vpc"
+    }
+}
+
+# for vpc with the Amazon-provided IPv6 CIDR block 
+resource "aws_vpc" "devops-vpc" {
+    cidr_block           = "10.0.0.0/16"
+    enable_dns_support   = true
+    enable_dns_hostnames = true
+
+    assign_generated_ipv6_cidr_block = true
+
+    tags = {
+        Name = "devops-vpc"
+    }
+}
+
+# allocate an Elastic IP address named nautilus-eip
+resource "aws_eip" "nautilus_eip" {
+    vpc = true
+    tags = {
+        Name = "nautilus-eip"
+    }
+}
+
+# ec2 with key pair and default security group
+resource "aws_instance" "nautilus_ec2" {
+    ami = "ami-0c101f26f147fa7fd" # Replace with a valid AMI ID
+    instance_type = "t2.micro"
+    key_name = aws_key_pair.nautilus-kp.key_name
+    vpc_security_group_ids = [data.aws_security_group.default.id]
+    tags = {
+        Name = "nautilus-ec2"
+    }
+}
+
+resource "tls_private_key" "example" {
+    algorithm = "RSA"
+    rsa_bits  = 4096  # Or another desired key size
+}
+
+resource "aws_key_pair" "nautilus-kp" {
+    key_name   = "nautilus-kp"
+    public_key = tls_private_key.example.public_key_openssh
+}
+
+data "aws_vpc" "default" {
+    default = true
+}
+
+data "aws_security_group" "default" {
+    filter {
+        name   = "group-name"
+        values = ["default"]
+    }
+
+    filter {
+        name   = "vpc-id"
+        values = [data.aws_vpc.default.id]
+    }
+}
+
+
+# Create an AMI from the instance
+resource "aws_ami_from_instance" "datacenter_ami" {
+  name               = "datacenter-ec2-ami"
+  source_instance_id = data.aws_instance.datacenter_ec2.id
+  snapshot_without_reboot = true
+
+  tags = {
+    Name = "datacenter-ec2-ami"
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}

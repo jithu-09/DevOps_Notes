@@ -1,0 +1,145 @@
+MongoDB - Document DB(NoSQL) - unlike Relational databases(SQL)
+
+Popular with web apps(MERN, MEAN)
+
+Data stored in different documents, schema need not be same for all the docs
+
+All info related to docs stored in one place- so while querying only one doc retrieved, no need to do join or other funcs.
+all docs can be modified independently, smlrly delete, insert etc.
+
+mongodb database - has <databases>(created after each installation of mongodb)
+                - Each database has <collections>, collections have <documents>: data stored here
+                - Documents are grouped to form collections based on similar fields, although they need not have identical fields to be      		  in a collection
+
+Two components - Mongo Server: Primary source of data storage. All the data is stored here. Activated using "mongod" cmd.
+                 Mongo shell: Used to perform CRUD operations and manage mongo server. Can manage local server using local shell.
+                              Can also manage remote server using local shell.
+                 #Both are based on JavaScript engine.
+
+MongoDB Atlas - For using in production
+
+db.version()
+- db is object, version is function
+
+cls- clear 
+
+{ "ok" : 1 } => implies an operation is successful.
+
+Data formats in MongoDB:
+- JSON: JavaScript Object Notation. It is represented as a string, only 6 data types: string, number, null, Boolean, object, array
+        Used for data sharing. Key-value pairs present
+
+'{
+   "type":"Phone",
+   "Model":234,
+   "Company":"Nu",
+    "InStock": true
+}'
+
+- JavaScript Object: Is a variable type, same as JSON but not a string
+
+ {
+   type:"Phone",
+   Model:234,
+   Company:"Nu",
+   InStock: true
+}
+
+Json -> JSON.parse() -> JavaScript Object -> JSON.stringify() -> Json
+
+- BSON: Binary JSON, document in dbs are stored in this format. Data in binary(ASCII codes), supports many more data types than JSON.
+
+- Extended JSON: Represent BSON in a human readable format. Allows to define what type should be used for values passed to mongodb.
+#Common BSON data types in used in EJSON:
+ -> String, object, Double(default for number if int not specified), Array, ISODATE(date), Boolean, ObjectId, 32-bit integer 
+#TypeId: embedded in the BSON format to represent each data type present in the file(02, 11, 07 etc.)
+
+- Database will be created after you create a collection in it:
+use class
+db.createCollecion("student") => "class" db will be created with collection "student"
+
+to add data to a collection, two ways:
+- db.student.insertOne({})
+- db.student.insertMany([{}, {}, {},...])
+
+recommended way:
+add data to a const:
+const doc = {};
+db.student.insertOne/Many(doc)
+- you will get an acknowledgement along with insertedId(objectId) like:
+{
+  acknowledged: true,
+  insertedId: ObjectId('683586e3e6b5b41ac2d861e0')
+}
+- view all the entries in a collection:
+db.getCollection("student").find({})
+#in mongodb ui, if you click on a collection - you get find function with an empty object by default like the above cmd to execute
+#Can pass any field of the data inside '{}' to query certain data - returns all the objects having the matching field
+#Another way: findOne({}) - Returns the first object matching the field given
+#incase of embedded fields like:
+ "author": {
+     "name": "you"
+     "genre": "psych"
+} => you can pass any one fields as:  db.getCollection("student").find({"author.name": "you"}) if normal like array or other types then: db.getCollection("student").find({postId: 3451}) i.e, no need of "" for the identifier
+
+Query operators:
+- start with $
+- using greater than($gt): db.getCollection("books").find({comments: {$gt: 0}})
+- using and($and): db.getCollection("books").find({$and: [{comments: {$lt:5}},{comments:{$gt: 0}}]})
+- using or($or): db.getCollection("books").find({$or: [{shared: false},{tags:"programming"}]})
+- using in($in): db.getCollection("books").find({tags: {$in: ["coding","programming"]}})
+
+Helper menthods:
+- limit: to limit the output: db.getCollection("books").find({}).limit(1) #first one showed
+- skip: to skip certain entires in output: db.getCollection("books").find({}).skip(1) #first one skipped
+- sort: to sort the output asc(1) or dsc(-1): db.getCollection("books").find({}).skip(1).sort({comments: 1(asc)/-1(dsc)})
+#default sort is asc order of objectIds
+
+Update document: updateOne(query, func), update(query, func)
+- Using set($set): db.getCollection("books").updateOne({postId: 3015}, {$set: {comments: 25}}) -> comments: 25
+- Using increment($inc): db.getCollection("books").updateOne({postId: 3015}, {$inc: {comments: 2}}) -> comments+2
+- Using unset($unset): db.getCollection("books").updateOne({postId: 3015}, {$unset: {comments: 1}}) -> Comments will be removed
+
+Delete Document: deleteOne(), deleteMany()
+- Using deletOne(): db.getCollection("books").deleteOne({postId: 111})
+- Using deletMany(): db.getCollection("books").deleteMany({title: {$exists: false}})
+
+Aggregation framework:
+- To create subsets of documents based on conditions/queries passed
+- Using aggregate: db.books.aggregate([{$group: {_id: "$author.name"}}])
+[
+  { _id: 'Mike Forester' },
+  { _id: 'Emily Watson' },
+  { _id: 'Bob Hutchinson' }
+]
+
+Mongo utilities:
+- Mongo export: export format - csv or strict/shell mode extended json
+ex: mongoexport --db myDb --collection persons --out persons.json --type=csv(this only for csv formt case) 
+ex2: remote cxn: mongoexport --host <ec2(vm) hostname> -- username <> --password <> --authenticationDatabase <> --db myDb --collection persons --out persons.json
+SYNTAX:
+mongoexport --host <> --username <> --password <> --authenticationDatabase <> --db <> --collection <> --out <filename>
+#MongoDB allows users to be created in specific databases. Even if you're exporting data from, say, studentsDB, your user credentials might be stored in the admin database. => default setup(setup of mongodb), then authdb is always admin if custom setup then custom db
+authenticATIONdATABASE Is to auth user creds.
+#has --jsonArray option to export data as array of json objects, each object stored in an array, seperated by comma.
+#You need to run mongoexport from your terminal or command prompt, not from inside the MongoDB shell.
+#you also need to install mongoDB Database Tools, which include mongoexport.
+# can also query by adding --query <>
+#_id key cant be used the document => will get duplicate key error
+
+- Mongo import: export format - csv or strict/shell mode extended json
+ex: mongoimport --db myDb --collection persons --out persons.json --type=csv(this only for csv formt case)
+ex2: remote cxn: mongoimport --host <ec2(vm) hostname> -- username <> --password <> --authenticationDatabase <> --db myDb --collection persons --out persons.json
+SYNTAX:
+mongoimport --host <> --username <> --password <> --authenticationDatabase <> --db <> --collection <> --out <filename>
+# both to export and import collection data in Extended Json format
+
+-Mongo dump : Export in binary format, all formats along with indexes will be exported
+# without --db, all dbs except 'local' will be dumped. same if you mention db and don't mention collections.
+#specific db dump: mongodump --db myDb => all collections in myDb will be dumped.
+syntax same as export just use mongodump:
+ mongoimport --host <ec2(vm) hostname> -- username <> --password <> --authenticationDatabase <> --db myDb --collection persons --out <directoryname>(where you want the dump to be stored. If not mentioned, a dump folder will be created)
+-mongo restore
+# to dump and restore from dump in Bson format
+- Mongo Stat
+- Mongo Top

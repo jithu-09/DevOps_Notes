@@ -1,0 +1,23 @@
+Converting text to executable code -> building(usually done with a build script)
+
+executable file runs in production
+
+Git- underlying tech for managing teams
+GitHub - publicly hosted git-based central repo of code
+other ex: GitLab, bitbucket
+
+dev -> GitHub -> then to build server -> then tested in test server -> manually shifted to prod server
+
+release features regularly, automatically to various servers, and faster - CICD tools used
+
+containers- package dependencies along with app => enables app to run on any server, gives isolation
+
+Manage container deploy, destroy, manage for optimal util - Kubernetes
+
+Infra provision with all pre-config stuff - Automated using IAC tools
+ex: Terraform
+
+Post config tool- Ansible
+
+Monitoring- Prom + Graf
+

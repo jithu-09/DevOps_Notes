@@ -1,0 +1,17 @@
+sudo useradd -s /usr/sbin/nologin javed
+
+# -s /usr/sbin/nologin: Sets the shell to nologin, which prevents the user from logging in interactively.
+path for nologin: which nologin
+
+# to set expiration date for the user, add this: -e 2023-12-07 
+
+#to prevent root login: sudo vi /etc/ssh/sshd_config -> set permitrootlogin to no, save it and then do: sudo systemctl restart sshd
+
+# pswd-ledd auth for a user to a server:
+- ssh-keygen -t rsa in user server
+- copy pub key to dest server: ssh-copi-id <sudouser>@<ip>: ssh-copy-id tony@176.28.23.101
+  pub key will be added at: /home/sudouser/.ssh/autthorized_keys on the server
+- you can then ssh <sudouser>@<ip> without pswd from the user server
+
+#if you install a package using sudo: sudo pip3 install ansible==4.9.0 => puts ansible in system PATH(/usr/bin or /usr/local/bin)
+ => verify: which ansible => should give: /usr/local/bin/ansible => avail globally to all users

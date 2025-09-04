@@ -1,0 +1,137 @@
+Git
+
+open source contribution:
+- You fork the repo, make changes in your fork, and then create a pull request to the upstream repo to propose those changes to the original project.
+- Fork = GitHub-level action, Clone = Local machine-level action.
+- fork it, clone the fork, make changes.
+
+- <<git fetch>> retrieves the latest changes from the remote repository without merging them into your current branch. Gives more control, review changes.
+  -> Ex: git fetch origin, see what others have pushed. prepare for manual merge/rebase, avoid surprise changes to your working branch
+ 
+- <<git pull>> does the same as fetch but also automatically merges the changes into your current branch. When ready to sync changes directly. Common one.
+  -> Ex: git pull origin main = git fetch origin + git merge origin/main, git pull is faster, it can cause unintended merges if you’re not ready.
+  -> Use cases:
+     - I’m working alone or in a small team where merge conflicts are rare
+     - I'm contributing to a feature branch that others aren’t modifying
+     - I want to frequently pull in the latest changes to test or deploy updates
+
+- <<git merge>> integrates changes by creating a new merge commit, preserving the history of both branches. #Can merge with commit ID(from git log <branch name>) or branch name also
+  -> ex:
+       A---B---C (main)
+           \
+            D---E---F (feature)
+                 \
+                  G (merge commit)
+
+    The line from B to D shows that D is based on B — i.e., the feature branch was created from commit B.
+    The line from E to G shows that G is a merge commit, combining changes from both:
+    The feature branch (ending at F)
+    The main branch (ending at C) => Lines are not actual commits themselves, but rather visual indicators of relationships between commits.
+
+    - A → B → C: Commits on the main branch.
+      D → E → F: Commits on the feature branch, which branched off from B.
+      G: A merge commit that combines changes from both main (up to C) and feature (up to F).
+      So after the merge:
+
+      The main branch will look like: A → B → C → G
+      The feature branch still has: A → B → D → E → F
+      And G contains the combined history of both.
+
+- <<git rebase>> moves your branch on top of another, rewriting commit history to create a linear sequence.
+  -> ex:
+       A---B---C (main)
+             \
+              D'---E'---F' (rebased feature)
+
+     - A, B, and C are still part of the main branch and remain untouched and intact.
+     - The feature branch (D' → E' → F') is now rebased on top of C, meaning it appears as if it was developed starting from C.
+     -           Use merge when...	                          Use rebase when...
+       You're collaborating on shared branches	       You're working alone or before a PR merge
+         You want to preserve commit context	            You want a clean, linear history
+            History safety is a concern	                    You're cleaning up before pushing
+
+- Main branch: Protected with branch rules and mandatory code reviews. Developers do not commit directly to main. All changes go through pull requests.
+- Feature Branch: Developers work independently and raise PRs when done.
+- release/* branches:
+  -> Cut from main when preparing for a release, e.g., release/1.4.
+  -> Only allows bug fixes, performance improvements, and docs.
+  -> CI pipelines run regression tests and validations here.
+  -> Used for staging deployments and QA approvals.
+- hotfix/* branches
+  -> Created from the latest release tag or main, based on urgency.
+  -> Used when we need to fix critical bugs directly on production without waiting for the next release cycle.
+  -> After fixing and testing, changes are merged back to both main and the relevant release/* branch.
+  -> This ensures the fix is available in both the short term and future releases.
+# Supports parallel development and safe releases. Keeps main clean and always deployable, easy to trace features and bug fixes and aligns well with CI/CD automation and changelog generation.
+
+- Some practical issues faced:
+  -> Merge Conflicts During Pulls: sol - git fetch then merge or rebase
+  -> Messy Commit History with Frequent Merges: sol- rebase
+  -> Confusion Between Fork and Clone in Open-Source Work
+  -> branching strategy among teams, main/dev or master/feature etc, unified across teams to main, feature, release, hotfix.
+     - CI pipelines were failing due to missing expected branches like main or release.
+     - Some teams rebased public branches, which broke collaborators' work.
+     - Merge conflicts were common in integration environments.
+     - Releases were often delayed due to confusion about which branch was production-ready.
+    # solution: study the current state, unify strategy, rollout with tooling(stared repos) and education(playbooks), feedback from teams(with temporary exceptions)
+
+- git diff: gives changes to committed file, eg: git diff hello.txt
+
+- Ours strategy favors your current branch’s changes(state), even if the other branch has different content.
+  ex: git merge -s ours feature-branch
+   ->  This does not mean it merges and keeps both sets of changes. It pretends to merge but keeps only your current branch's content, marking the merge as done. cases: rolling back hotfix to keep current state. When merging a long-dead branch just to close it but keep your branch's state intact.
+
+- Theirs isn't directly available as a merge strategy but can be used during conflict resolution in a rebase or a manual merge to accept incoming changes over yours.
+   -> ex: git checkout --theirs conflicted_file.txt
+          git add conflicted_file.txt
+      - this tells git: For this conflicted file, discard my local version and use the version from the branch I’m merging in.
+      - cases: When the incoming changes are definitely correct, During git rebase when resolving repetitive or well-understood conflicts
+
+- Git Tags: Mark release versions of our applications. track which commit corresponds to a production deployment. visibility, traceability, and control in software releases.
+  # annotated tags:
+    - git tag -a v1.0.3 -m "Release version 1.0.3 with critical bug fixes"
+      git push origin v1.0.3
+    - Picked by CI/CD tools, used as a part of deployment name: version was running in production is always known.
+    - Marked release point, versioned build, consistent deployments/releases, rollback/auditing support. 
+
+- Squash/ merge multiple commits into one: through interactive rebase # Commonly used before merging a feature branch into main, squashing commits
+  best practice when preparing PRs or fixing review feedback across multiple small commits.
+
+ ex: git log --oneline
+     abc123 Fix typo  
+     ghi789 Update error message
+     def456 Add input validation => three commits(can be more)
+
+     - run: git rebase -i HEAD~3
+     - You get: open editor with last there commits
+       pick abc123 Fix typo
+       pick ghi789 Update error message
+       pick def456 Add input validation
+     - you can squash all and pick one
+       pick   abc123 Fix typo
+       squash ghi789 Update error message
+       squash def456 Add input validation
+     - Then write a new commit message when prompted, save, and exit.
+     - run: git push origin branch-name --force/--f
+     # Same process with remote branches, first clone it to local and do the same.
+
+- When you run: git init
+  -> creates hidden directory ".git/" folder in the root of your project(backbone of a git repo, converts your normal repo to a git repo, not a git repo w.o it)  internal database and control center of your repository.
+  -> The .git folder contains all the metadata, configuration, and object database Git needs to manage version control. 
+  -> stores everything Git needs to track versions, branches, commits, and configurations.
+  -> If you delete or corrupt it, Git can no longer track changes.
+  -> If you copy the .git folder into another directory, you essentially clone the repo without using a remote.
+  -> delete the .git folder when cleaning up, which removes all Git history — not just local changes.
+  # Restore deleted .git folder? Possible only if you have backup or access to another clone of the repo
+   - problem? any commits staged to the deleted .git folder or any commits made to the deleted folder but not present in remote/local copy will be lost.
+
+- A secret commited to repo by mistake:
+  -> Assume that the secret is compromised, create a new one i.e, rotate the secret and update the manifests.
+    - kubectl create secret generic my-secret --from-literal=password=newpassword --dry-run=client -o yaml | kubectl apply -f -
+  -> Remove it from git commit, not just recet but from entire commit history
+    - git filter-repo --path secret.yaml --invert-paths, than git push --force
+  -> Add secrets file to gitignore file to prevent further accidents
+    - In .gitignore => secrets.yaml 
+                       *.key
+
+- git stash pop: to see the changes made

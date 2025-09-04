@@ -1,0 +1,23 @@
+GIT - Open source distributed version control system
+
+-> have all the version of your work, can keep current state or go back to a previous state independently
+-> Local repo- on own machine, remote repo- on a central server => push to remote repo, pull to local repo
+   - local: working area(active changes, don't know if you'll commit)
+            staging area(new changes, not committed yet)
+            committed files
+
+-> commits gives version control to your project
+
+-> git init
+-> git status: on branch(tells the branch), No commits yet(tells nothing is committed), untracked files: present in local but not under git, changes to be committed: in staging area
+-> git add: to add stuff to staging area
+-> git commit -m "": to commit files in stagging area with some msg
+   # W.O -m, git will open an editor to enter a commit msg
+-> git restore: current changes will be replaced with prev changes
+-> echo notes.txt >> .gitignore: to ignore a file during commits
+-> git log: commit hash. author, date and commit msg => doesn't show changed files
+   for that, do: git log --name-only
+# cd /home/sarah/story-blog; git log : two cmds at once
+# branches: pointers to certain commit
+# head : points to the last commit on the branch you are currently on
+# master: default branch of a git repo

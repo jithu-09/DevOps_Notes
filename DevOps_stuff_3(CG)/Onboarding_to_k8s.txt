@@ -1,0 +1,49 @@
+Onboarding to k8s:
+
+- MNC containerized application deploying through docker compose, ext world access through load balancer. 
+- Shift entire setup to k8s.
+
+Step-1:
+#Don't directly deploy to a cluster
+- Requirement gathering:
+  -> Identify the microservices used
+  -> Identify the teams working on these microsvcs: helps in creating namespaces(logical isolation)
+  -> Identify low, med and high critical resources( Business impact and onboarding criticality)
+  -> Identify resource util: either through observability stack or through billing console or cloudwatch( incase of ec2), cpu, mem, ram etc
+  -> Identify cost for eks, aks or gke etc based on earlier step costs( there should be a balance btw cost and performance)
+  -> Environment readiness and migration timeline
+ # prepare this plan, discuss with devs, business etc get approvals
+
+Step-2: 
+- Proof of concept(POC): Goal- Verify readiness
+ -> Select few microsvcs from critical, med, low impact 
+ -> create deployments, svc, ingress, ingress controller(use cloud provider's if in doubt) for them. 
+ -> Choose combo of them, stateful and stateless apps, db svc, caching svc, queuing svc etc, diverse svcs to test.
+ -> Deploy them onto a small cluster and test the traffic along with the QA teams.
+ -> Resolve issue you face.
+ -> Proceed further if everything is okay.
+
+Step-3:
+- Dev k8s cluster: Goal - Dev env is ready
+ -> Identify(from step 1) the resource usage in total say 60cpu and 60gb ram => ensure min of 3 nodes in both control and data planes(data plane can be scaled to 5000 nodes, each node to 110 pods)
+    - Each node should have just above the required resources => each node(data plane) in this case with 22cpu and 24gb ram
+ -> Create namespaces: One per team is the best way, implement RBAC with IAM( done through oidc provider)- to restrict other teams from  	  		       accessing other namespaces.
+ -> Define resource quotas- to restrict namespaces from using more than required resources + limits and requests - to prevent pods from using 				    resources more than required.
+ 
+Step-4:
+- Onboarding staging env: Goal - Verify readiness
+ -> two popular ways to achieve this: 
+ *-> Same cluster for both dev and staging env, isolation through namespaces for both the stages, relies on very strict RBAC as when devs   	expirement in dev env(making it unstable), a stable env is required to play out prod scenarios or in debugging. Increase the resources  	as per requirement so that both env function without issue.
+ *-> Diff clusters for dev and stage - can use the exact same way(as in step 3) to create staging cluster. Better approach as devs can 	expirement in dev cluster and a stable env will be available for prod cases. Little costlier as a new cluster is setup.
+
+Step-5:
+- Onboarding Prod: Goal - Verify readiness
+ -> Implement multi-Az for data plane nodes: 3 nodes => in 3 diff azs in a region
+    - replicas of deployments in diff azs as well( use k8s topology spread constraints)
+    - Pods also must be deployed onto nodes in these AZs only(taints and tolerations, node affinity)
+
+Step-6:
+- Scaling Production: For high avail, Multi region cluster to decrease latency
+ -> Setup diff clusters in diff region(high avail setup)
+ -> deploy pods in diff clusters, create ingress and other stuff in all the clusters for the pods
+ -> front face all the ingress with global load balancer(ALB or dns routing etc)

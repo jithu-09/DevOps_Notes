@@ -1,0 +1,41 @@
+services:
+    x:
+     image: (or) build: . # This will build the container from the Dockerfile stored locally.
+     ports:
+       - ":"
+     depends_on:
+       y:
+        condition: service_healthy   # will wait for y to be ready
+     volumes:
+       - 
+     networks:
+       -
+     #can also have
+     restart: (always/never)
+     healthcheck:
+       test: ["CMD", "redis-cli", "ping"] #cmds you want to run to test the svc
+       interval: 10s
+       timeout: 5s
+       retries: 5
+       start_period: 10s
+     environment:
+        a:
+        b:
+        c:
+    y:
+    z:
+
+volumes:
+  postgres-vol:
+
+networks:
+  abc-network
+
+#Docker Compose doesn't require services to be defined in dependency order.
+
+#Docker:
+ RUN pip install --no-cache-dir -r requirements.txt
+ - RUN: dockerfile directive: to run cmds inside image during build time, create a new layer in docker image
+ - pip: Python package installer: installs from Python Package Index (PyPI) or other sources.
+ - --no-cache-dir: tells pip not to store downloaded packages in the cache. Reduces final image size
+ - -r: "read from a file"; requirements.txt is a file that lists all the Python packages your app depends on.

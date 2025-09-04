@@ -1,0 +1,26 @@
+why banks can't implement zero downtime?
+
+- sends alerts about maintenance downtime.
+- due to monolithic architecture(entire code bundled into one package)
+  -> Any small change needs deployment of entire code => then business testing done(automated test cases, qe engineer or a bank emp) => then made live
+- making mono to microsvcs archi doesn't give zero downtime => deployment strat also needs change
+  -> Canary: ratio/weight - based Load balancing => new ver tested with smaller group, old version is kept live.
+- DB migrations: can lead to maint. windows
+- Feature flags - Can tell users to use it only when testing is done so meantime qe can test it maybe not cover all cases, if anything breaks, just aask users to turn off that feature.
+
+
+Docker offload(beta):
+
+- offload containers to run on docker cloud(feels like local), toggle at top left in docker desktop, can switch anytime
+- also supports gpus(working with AI agents) - typically Nvidia L4 GPU
+- 4.43+ docker desktop versions
+- through terminal: docker offload start => asks for account confirmation and about gps => docker context ls - tells docker-cloud* is the context
+- use gpus: docker run --gpus all
+- stop: docker offload stop
+
+Do this projects:
+
+- 2048 game( abhi YT ): lifecycle of 2tier app, cont. app, create manifests for the app, create enterprise k8s cluster from scratch, svc account, namespace, expose the deployed app to ext world using ingress and LB
+- azure devops end to end to migrate project to azure.
+- udemy project
+- 3tier archi ecom app( abhi YT): lifecycle of 3 tier app, comms btw microsvcs, deploy db

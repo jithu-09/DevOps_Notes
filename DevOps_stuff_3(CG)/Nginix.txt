@@ -1,0 +1,64 @@
+Nginix:
+
+What is it?: Open source high performance web server(serves static content), also used as reverse proxy, load balancer, http caching.
+Why it over apache httpd(thread based archi)?: 
+- Event driven archi
+- Mem usage very low 
+- very simple, serves static content faster
+
+#pem file perms: 400
+
+- nginx runs default on port 80 => on vms, if you access instance ip using http(80) or https(443), it will come up without mentioning the port
+# to start: sudo systemctl start nginx, lly status and stop
+- how does it server the static content?
+  -> #webserver: used to server static content(html, css, js)
+  -> nginx creates a default folder on download(etc) => /etc/nginx has nginx config files, this also has sites-available folder => 
+     this one has various domains config files.
+     - default is out of the box created by nginx inside this
+     - it tells if nginx finds "index." files inside /var/www/html then it has to serve that content
+     - Nginx also creates a "index." file inside /var/www/html => access on ip or ip/ gives the static content.
+  -> to use various domains with same nginx server => have to create domain config files under /etc/nginx/sites-available
+     # server block change: listen 80 <exampledomain>
+     # location: location /<domain to be used>
+     # root also shld be updated
+  -> have to create a symbolic link in /etc/nginx/sites-enabled for the domains in sites-available => then nginx considers config ready for those domains
+  
+
+- nginx.conf:
+  -> Can use this to find where the eroor log files, access log files etc.
+
+- To server your own content through nginx => create a new index file under var/www/html
+  then reload nginx: sudo systemctl reload nginx
+
+- If you access at anyother path to url, it return 404 not found, how?: it is configd in default file under "location" block.
+
+
+- As Reverse Proxy:
+  -> RP takes care of DDos attacks, vulnerability attacks, penetration test attacks, rate limiting attacks etc.
+  -> Client->Nginix->App => client gets dns(or ip) of nginx instead of app dns, no direct access, nginx front faces the app.
+  -> Takes care of rate limiting, web app firewall, ssl/tls, and security related stuff
+  -> to setup as RP: add this under location vlock in default file under /etc/nginx/sites-available
+     - proxy_pass http://localhost:3000; here proxy pass forwards requests to backend app(in this case app at port 3000)
+     - app server shld also be running for it. else give 502 bas gateway error
+
+# to verify nginx syntax of config: sudo nginx -t
+
+- As Load Balancer:
+  -> used to distribute traffic among no of backend servers.
+  -> default: round robin algo - equally among servers
+  -> nginx can handle adv LB: weight based, ip based etc
+  -> add backend servers in an upstream block above server in /etc/nginx/sites-available/default as:
+     upstream backend_app { # upstream implies absorbs data from it
+    	server 127.0.0.1:3001;
+    	server 127.0.0.1:3002;
+     }
+     # here, if you want to use a diff LB method: just add the method name above servers as: leat_conn;(least connections) or ip_hash(like sticky session - req always goes to one server, incase of stateful apps);
+     => proxy pass will change as: proxy pass: http://backend_app
+     
+- With ssl/tls: create a self-signed certificate
+  ->this cmd to crate the cert, common name field shld be localhost:
+    sudo openssl req -x509 -nodes -days 365 \
+ -newkey rsa:2048 \
+ -keyout /etc/ssl/private/nginx-selfsigned.key \ #loc of key to the cert
+ -out /etc/ssl/certs/nginx-selfsigned.crt #location of the cert
+

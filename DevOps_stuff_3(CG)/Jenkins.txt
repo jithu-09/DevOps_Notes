@@ -1,0 +1,45 @@
+Jenkins
+
+- to change port of Jenkins
+  -> cd /lib/systemd/system
+     sudo vi jenkins.service - change port in this
+  -> then: 
+     cd /lib/systemd/system
+     sudo vi jenkins.service - change the env var port in this
+  -> then, do:
+     sudo systemctl daemon-reload
+     sudo systemctl restart Jenkins
+  -> Now the port of Jenkins will be changed from 8080 to your port
+
+SonarQube
+
+- Another way to run SonarQube:
+  -> docker run -d --name sonarqube-cont -p 9000:9000 sonarqube:lts-community
+
+- Set up the Webhook connection with SonarQube.In ***Administration -> Configuration -> WebHooks.***Webhooks in Sonarqube are used to tell the third Party(Jenkins) when the code analysis is complete.
+
+- stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('Sonarqube') {
+                   sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Petshop \
+                    -Dsonar.java.binaries=. \
+                    -Dsonar.projectKey=Petshop '''   
+                }
+            }
+        }
+  => sometimes mismatch in env in steps can lead to errors like config mismatch errors like:
+     "SonarQube installation defined in this job (SonarQube) does not match any configured installation."
+
+Trivy
+
+- Trivy is a tool used for scanning Known vulnerabilities from IAC issues, misconfiguration, sensitive secrets, container images, software licenses, and even Kubernetes clusters. It generates a full report of all the vulnerabilities based on their severity. You can even sort or search for the vulnerability based on its severity. 
+
+Install:
+ - sudo apt-get install wget apt-transport-https gnupg lsb-release -y
+   wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+   echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a   /etc/apt/sources.list.d/trivy.list
+   sudo apt-get update
+   sudo apt-get install trivy -y
+
+#multiple processes => be careful with ports, track what ports the appns are using to prevent unwanted errors
+- example, appn not running as docker container is running on that port.

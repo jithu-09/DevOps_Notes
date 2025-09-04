@@ -1,0 +1,56 @@
+terraform - will brock
+
+-> Provisioners:
+   - with file and remote-exec provisioners:
+     connection block is req :
+       connection {
+          type = "SSH"
+          host = self.public_ip
+          user = "ubuntu"
+          private_key = file("home/downloads/private.pem")
+       }
+     to ssh: ssh -I "<PATH TO PVT KEY in quotes>" <username>@<public-ip>
+     # can be inside a provisioner block, can give diff ip for that particular provisioner blk. defaults to source resource if given ip not working
+
+-> Modules: Group resources in a package like thing. Can be called in diff configs. Modules in js, packages in py.
+   -  main structure: main.tf, variables.tf, outputs.tf(needed to use module vars values elsewhere), README.md
+   - specify version in terraform block in main.tf of a module - min version req to use this module.
+   - call using "module", name can be anything:
+     module "my_block"{
+        source = "../modules/my_blk"
+ 	provider = {aws = aws.east}
+        <all vars needed to pass>
+     }
+   - need to run terraform init to use it
+   - can call module inside another module - not recommended tho
+   - module.<module_name>.<var_name>.id - to use values of module
+   - can specify meta args(count, for each), tf ver >0.13
+
+-> Workspaces:
+   - Multiple states, same config - states stored under : "terraform.tfstate.d" folder
+   - like git branches
+   - default workspace is used at start - terraform workspace list, current: terraform workspace show
+   - create: terraform workspace new <name>
+   - variablize all attributes
+   - use workspace name: ${terraform.workspace}
+   - diff tfvars(only values, variables.tf - define vars, this can be same across workspaces) files for each workspace, during apply - terraform apply -var-file="dev.tfvars"(or "path/tp/var/file")
+   - terraform.tfvars: auto loaded, workspace tfvars files need to be given to apply command.
+   # it's possible to apply a Terraform configuration using a .tfvars file from outside the current workspace, it requires careful planning and management to avoid errors.
+
+-> Remote state and backend:
+   - terraform.tfstate: local state file
+   - remote state: state not manages locally(s3 bucket popular choice) - retrieves data from s3, takes new changes and adds them to existing state.
+   - state locking: first come first execute(prevents others from overwriting your changes)
+   - backend block:
+     terraform{
+       backend "s3"{
+        bucket = ""
+        region = ""
+        key    = ""(where state file is stored)
+        use_lockfile = "true"(native state locking)
+       }
+     } # s3 shld have req permisions for tf to access it
+   - You have a local state and create a new remote backend, on init, tf asks if you want to copy current state to new backend
+     # take a backup: cp terraform.tfstate terraform.tfstate.backup
+       with timestamp: cp terraform.tfstate terraform.tfstate.backup.$(date +%Y%m%d%H%M%S)
+       for remote state: aws s3 cp s3://your-bucket-name/path/to/terraform.tfstate ./terraform.tfstate.backup

@@ -1,0 +1,8 @@
+-e to pass env vars in docker cmds
+
+app.run(-host=0.0.0.0, port=5000) inside flask app.py # to access from everywhere
+
+# you change app.py, if using dockerfile, then build the image again
+
+#using hostpath in deployment ties the deployment to local setup, breaks portability
+- use config map or emptyDir

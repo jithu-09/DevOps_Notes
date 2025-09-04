@@ -1,0 +1,26 @@
+AWS serverless authentication for SaaS applications:
+
+sign up:
+- user processed through AWS Cognito userpool, sends a mail or an sms with otp after receiving required details post which it will trigger a post-confirmation Lambda i.e, to confirm the user.
+- then a serverless function(aws lambda) to confirm user will be run to confirm the user, write user details, permissions to DynamoDB(permission table) and associate with a domain(if applicable- domain table)
+- then a confirmation email is sent SES(simple email service - cloud-based email service) and the user is synced to marketing platforms if opted in(like beehive, hubspot etc)
+
+login:
+- when user logs in with cognito creds, cognito verifies password, a jwt token will be generated and a pre token generation function will be run which will add required info like user permission, domains (if applicable), custom claims(roles, perms, domains) to the token.
+- this gives all the info that the application needs to authenticate the user without an extra api calls.
+
+##jwt- JSON web token is an open standard of means to securely transfer info as a json object btw two parties. Used for authentication and info exchange.
+
+what is devops?
+DevOps is an approach to culture, automation, and platform design intended to deliver increased business value and responsiveness through rapid, high-quality service delivery.
+It means linking legacy apps to new cloud-native apps and infra
+DevOps describes the approaches to speed up procceses to take an idea from its intial dev stage to prod ready stage to deploy that ca be of value to users.
+At its core, DevOps relies on automating routine operational tasks and standardizing environments across an app’s lifecycle.
+Containers are an easy way to move around, move apps from one env to another, lets developers package and isolate their apps with everything they need to run, including application files, runtime environments, dependent libraries and configurations.
+Containers can offer standardized environments.
+
+
+Inside common_tags: Access using local.common_tags["key"].
+Outside common_tags: Directly use local.prefix or other variables.
+
+

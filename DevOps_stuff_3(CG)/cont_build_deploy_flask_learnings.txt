@@ -1,0 +1,9 @@
+continuous build and deploy flask app on ec2 using TF:
+
+learnings:
+- adding private key to the repo: include the comments as well(beginning of private key, end of private key)
+- when diff tf files in same level: you can refer resources in file in another as aws_<resource>.<resource name in file>.id(sometimes you get error when you give name instead of id
+- all tf files must be at root for workflows to execute or their path should be referred in the workflow jobs
+- aws-actions/configure-aws-credentials@v1: only configures the AWS CLI for the GitHub Actions runner, not for the remote EC2 instance.
+=> for remote ssh action, you need to install aws cli again on the instance
+- when you have build and deploy: add needs: build to deploy stage - deploy might fail when it needs to pull image but build stage is still creating the image.

@@ -1,0 +1,41 @@
+Terraform
+
+
++ for-each vs for:
+  -> for_each → use when you need Terraform to create N physical resources.
+  -> for → use when you need a derived list or map for arguments or outputs.
+  -> They complement each other: you might build a map with for, then pass it to for_each for scalable resource creation.
+  Ex: 
+  - for_each:
+    resource "aws_s3_bucket" "logs" {
+    for_each = {
+      us = "us-east-1"
+      eu = "eu-west-1"
+      ap = "ap-southeast-1"
+    }
+
+    bucket = "app-logs-${each.key}"
+    region = each.value
+    } => Terraform plans three distinct buckets: aws_s3_bucket.logs["us"], aws_s3_bucket.logs["eu"], aws_s3_bucket.logs["ap"].
+  - for:
+    variable "allowed_cidrs" {
+     type    = list(string)
+     default = ["10.0.0.0/24", "10.1.0.0/24"]
+    }
+
+    locals {
+     cidr_to_rule = {
+        for cidr in var.allowed_cidrs :
+        cidr => { protocol = "tcp", port = 22 }
+     }
+    } => This produces a map:
+	{
+  	  "10.0.0.0/24": { "protocol": "tcp", "port": 22 },
+  	  "10.1.0.0/24": { "protocol": "tcp", "port": 22 }
+	}
+
++ Modules: Terraform modules are self-contained packages of Terraform configuration 
+  -> avoid repetition, enforce consistency, abstraction, scalability and organize infrastructure into logical components.
+  -> can be local, on GitHub, or even on the Terraform Registry(Give source in parent module).
+  -> Root module: the directory where terraform apply is run. Child module: a reusable set of configurations called from a root or another module.
+  -> Like function in programming - promote clean, DRY(don't repeat yourself) code to help build a scalable and maintainable infra.

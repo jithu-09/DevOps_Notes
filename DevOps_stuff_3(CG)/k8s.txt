@@ -1,0 +1,45 @@
+set cluster context;
+
+- aws eks update-kubeconfig --name <cluster name> --region <region>
+- kubectl config set-context <arn of the cluster> # arn: Amazon Resource Names (ARNs) uniquely identify AWS resources.
+- find out the context: kubectl config current-context
+- find out list of contexts: kubectl config get-context
+
+get Grafana password:
+kubectl get secret --namespace monitoring monitoring-grafana -o jsonpath="{.data.admin-password}" | base64 --decode
+
+get username:
+kubectl get secret --namespace monitoring monitoring-grafana -o jsonpath="{.data.admin-user}" | base64 --decode
+
+k8s svc to pod flow:
+
+- User/client hits the dns name
+- dns resolution of svc name to clusterIp in kube-dns/coreDNS
+- return cluster ip and are redirected to this cluster ip at specified port
+- svc receives req first and uses its selectors to identify matching pods.
+- enpoints resource lists the ips of pods matching the selector
+- kube-proxy watches svcs and endpts and sets up iptables/netrules to route the traffic
+- bridge network handles routing of the node
+- traffic sent to veth of host to reach the pod
+- traffic enters pod namespace through veth of the pod
+- pod receieves its request on its container port
+
+In Kubernetes resource definitions (like in YAML files for containers), the units m and Mi refer to:
+
+m (milli): This is used for CPU resources.
+
+150m means 150 millicores, or 0.15 CPU cores.
+So if a node has 1 CPU core, a container requesting 150m will use 15% of that core.
+Mi (Mebibytes): This is used for memory resources.
+
+300Mi means 300 mebibytes, which is approximately 314.57 megabytes (MB).
+1 MiB = 1024 × 1024 bytes = 1,048,576 bytes.
+
+memory: 300Mi → the container is allocated 300 MiB of memory.
+cpu: 150m → the container is allocated 0.15 of a CPU core.
+
+You tell Kubernetes two things:
+
+1) 𝗥𝗲𝗾𝘂𝗲𝘀𝘁: This is the minimum resource the container is guaranteed. Kubernetes uses this during scheduling.
+
+2) 𝗟𝗶𝗺𝗶𝘁: This is the upper cap. A container cannot exceed this.

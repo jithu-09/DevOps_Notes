@@ -1,0 +1,14 @@
+Nokia project - Telecom project
+
+Dev - another team
+DevOps and test -CG
+Entire thing maintained in Gitlab - Docker, Kubernetes, Ansible, all configured in it. 
+- pipeline triggered based on merge request
+- build, code scan, vulnerability test(SonarQube), smoke test, test, staging etc, 
+- then handover to QA, stakeholder test and then done to production. 
+- Deployment to bare metal, VMs maintained by Nokia. Images and configuration also.
+- Jira for project management.
+- Each customer request handled separately, Nokia has its pool of customers.
+- Incident management by different team.
+- In pipeline to move to EKS and GitHub Actions.
+- Security and DB?

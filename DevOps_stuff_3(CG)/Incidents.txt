@@ -1,0 +1,12 @@
+Incidents
+
+db for upgrade
+- primary bought down, secondary brought up as primary
+
+- some schema issue corrupted the database which was up, so after bringing up the upgraded db, both of them got synced and the second one also got corrupted => led to an escalation for 8 hrs, took another 17-18hrs for resolving it(till 2am in the night)
+
+- while testing with small user groups before deploying to public, if any networking issues come up, incident is raised, resolved with the help of networking team(usually an hr or two).
+
+- usual escalations will be reported, connectivity issue, we check with the users, try to do RCA and resolve it.
+
+#instance type and capacity changes can only be done once the instance is stopped

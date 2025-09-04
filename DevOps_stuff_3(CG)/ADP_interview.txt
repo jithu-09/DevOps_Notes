@@ -1,0 +1,129 @@
+ADP interview
+
+- metric: response_time<=3sec
+  => checking metric if it is being in the range - SLI(svc level indicator)
+  => making sure it is <=3sec for 99% of time - SLO(svc level objective)
+  => catering for the 1% error - error budget
+
+-  URL https://s3.amazonaws.com/... (or similar) is a public endpoint for Amazon S3 => public access, traffic goes over internet, objects have public read perms   # blocking public access => std url doesn't work unless: user is authenticated or req from a verified source(vpc endpts)
+  => to make it private:
+     - block public acess
+     - use vpc endpoints: ensures traffic to S3 stays within AWS's private network. No NAT or IGW needed, can access s3 via a pvt link inside your vpc
+     - use presigned urls:  temporary access for users(timed and secure)
+     - Iam & bucket policies: Avoid using s3:*, fine-grained access to specific vpc and iam roles(who can & can't)
+     - CloudFront: Viable alternative
+
+- AWS PrivateLink allows you to privately connect your VPC to supported AWS services, other VPCs, or on-premises services without using public IPs or traversing the internet.
+  => Instead of hitting s3.amazonaws.com, you can access S3 through a VPC endpoint powered by PrivateLink.
+  
+  # interface endpoint uses Pvt link - Creates an ENI (Elastic Network Interface) in your VPC. ENI connects to the AWS service (like S3) via PrivateLink.
+  - No need of IGW, NAT or pubips, Great for compliance, security, and performance.
+  
+  # Gateway Endpoints are used specifically for Amazon S3 and DynamoDB. Do not use PrivateLink, they add a route to your route table. 
+    Directs traffic to the AWS service via a private connection.
+  
+  - AWS automatically updates DNS so that requests to s3.amazonaws.com resolve to the private endpoint inside your VPC.
+  - Go to VPC Console → Endpoints → Create Endpoint.
+  - Choose Service Name: com.amazonaws.<region>.s3
+  - Select your VPC and route tables.
+  - Enable Private DNS (optional but recommended).
+  - Update your bucket policy to allow access only from your VPC endpoint.
+
+- order of executing in helm and argocd:
+  - Kubernetes doesn't guarantee execution order, but it does handle dependencies smartly:
+    -> ConfigMaps and Secrets before Deployments that reference them, will fail if not.
+    -> Services and Ingress can be created anytime, but they only become functional once the backing Pods are running.
+  - Can use Helm hooks: hook-weight to fine-tune order (lower weight = earlier execution), not managed by ArgoCD, so they can cause drift if not handled     carefully. #only if necessary
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: my-config
+      annotations:
+        "helm.sh/hook": pre-install
+        "helm.sh/hook-weight": "0"
+  - ArgoCD supports sync waves: #preferred
+    metadata:
+     annotations:
+       argocd.argoproj.io/sync-wave: "0"  # Lower number = earlier sync
+
+    # Typical wave setup: ConfigMap, Secret: wave 0, Service: wave 1, Deployment: wave 2, Ingress: wave 3
+
+  - Helm templates are rendered in alphabetical order unless you use hooks or dependencies. You can:
+    - Split resources into subcharts or templates with naming conventions (00-config.yaml, 01-deploy.yaml, etc.)
+    - Use dependsOn in Helm v3.9+
+
+  - Validate with kubectl describe or helm template to ensure correct rendering.
+
+- To sync during a particular duration in argocd: #ArgoCD itself doesn’t have built-in time-based sync control.
+  - Disable autosync and use a cron job or argocd notifs with scheduled trigger and use the ArgoCD API or CLI (argocd app sync <app-name>) to sync during your desired time window.
+    cronjob:
+        triggers:
+          - name: scheduled-sync
+            condition: time.cron("0 2 * * *")
+            action: sync
+  - External automation: GitHub Actions, AWS Lambda + EventBridge, Jenkins, CronJob in Kubernetes
+
+- You CAN manage infrastructure in a GitOps way—including importing externally created resources—without manually running terraform import in the console.
+  - terraform import is imperative and local, doesn't update your .tf files; only the state. Not git driven.
+  
+  - Terraformer: Tool that can: Scan existing infrastructure, Generate .tf files and terraform import commands. 
+    Output everything into a Git-compatible format. #  most GitOps-friendly way 
+    Workflow:
+      Run terraformer import aws_s3_bucket (or other resource).
+      Commit the generated .tf files and state to Git.
+      Push to your GitOps repo (e.g., ArgoCD + Terraform controller).
+      From then on, changes are Git-driven.
+    
+  - Terraform Cloud/Enterprise with VCS Integration: Connect your Git repo to Terraform Cloud, Use remote execution and state management.
+    You can still run terraform import once, then commit .tf files to Git. Future changes are Git-driven.
+    
+  - Use a Terraform Operator in Kubernetes: Tool like ArgoCD Terraform Controller allows to : Define infra as code in Git.
+    Sync changes automatically. Manage state and apply changes declaratively.
+
+- Pod anti-affinity is a Kubernetes scheduling rule that prevents certain pods from being scheduled on the same node as other pods.
+  uses: Spread pods across nodes for high availability, Avoid putting multiple replicas of the same app on the same node
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchLabels:
+              app: my-app
+          topologyKey: "kubernetes.io/hostname"
+  => Don’t schedule this pod on a node that already has a pod with label app: my-app
+
+- how to keep Terraform state files separate (e.g., one for S3, one for IAM) while still linking resources across them?
+  Need Avoid manual terraform import or console work.
+  - then, Use Remote State Data Source: Terraform provides a way to read outputs from another state file using the terraform_remote_state data source.
+  data "terraform_remote_state" "iam" {
+  	backend = "s3"
+  	config = {
+    	bucket = "your-iam-state-bucket"
+        key    = "iam/terraform.tfstate"
+    	region = "your-region"
+  	}
+  }
+
+  resource "aws_s3_bucket_policy" "example" {
+    bucket = aws_s3_bucket.example.id
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Effect = "Allow"
+          Principal = {
+            AWS = data.terraform_remote_state.iam.outputs.iam_role_arn
+          }
+          Action = "s3:*"
+          Resource = "${aws_s3_bucket.example.arn}/*"
+        }
+      ]
+    })
+  }
+ 
+ - No need to import manually. Keeps your IAM and S3 modules isolated.
+   Fully GitOps-compatible: changes in IAM module are reflected in S3 via outputs.
+   Works well with Terraform automation tools like Atlantis, Spacelift, or ArgoCD Terraform Controller.
+ - Ensure the IAM module exports outputs like iam_role_arn.
+   Make sure the state file is accessible (correct bucket, key, permissions).
+   If you're using workspaces, include that in the config.

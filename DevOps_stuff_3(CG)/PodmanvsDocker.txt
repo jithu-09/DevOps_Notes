@@ -1,0 +1,30 @@
+Podman vs Docker
+
+- Docker Daemon(dockerd) runs as root user: if container compromised => hacker can gain root user privileges
+- It is also single point of failure: if dockerd is down => containers also down
+
+podman tries to solve this:
+- It is daemon-less => no single point of failure => one container down others still run, don't run as root user(Secure). Node running docker is also not effected. 
+- Podman is an open source Open Container Initiative(OCI)-compliant container management tool from Red Hat used for handling containers, images, volumes, and pods on the Linux operating system, with support for macOS and Microsoft Windows via a virtual machine.
+- Podman provides a command line interface (CLI) familiar to anyone who has used the Docker Container Engine. Most users can simply alias Docker to Podman (alias docker=podman) without any problems.
+- This makes the running containers created by Podman nearly indistinguishable from those created by any other common container engine.
+- They made Podman api compatible with docker => can run same docker cmds, use existing dockerfiles.
+- Add alias docker=podman => run same docker cmds => under the hood using podman
+
+#Note:Docker addressed root user mode, can change it.
+
+# to check distributor in cli:
+run : lsb_release -a
+No LSB modules are available.
+Distributor ID: Ubuntu
+Description:    Ubuntu 20.04.6 LTS
+Release:        20.04
+Codename:       focal
+
+or hostnamectl
+
+
+## dockerfile is containerfile in podman
+## podman endores quay.io like docker hub for docker
+
+#Shift to podman is not necessary => docker has superior integrations and 3rd party compatibility than podman.

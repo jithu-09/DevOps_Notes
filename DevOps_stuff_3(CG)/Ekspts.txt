@@ -1,0 +1,7 @@
+Eks oidc-iam: pvc(EBS) to talk with EKS: svc acc of pv attached with iam role that has perm to talk with eks
+alb: expose app to ext world, its a req to deply it in kube-system namespace
+
+#if a resource creation fails, delete it's cloud formation stack and only then create new(else aws considers the new one as duplicate, won't create it)
+
+ebs csi driver: when storage class sees a pvc=> it will auto create pv(ebs vol) - this mechanism is automated using the driver added to eks(k8s cluster) 
+

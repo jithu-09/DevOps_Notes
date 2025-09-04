@@ -1,0 +1,108 @@
+deploy prod-ready 3tier(FE-React, BE-Flask, DB-PostgreSQL) application in EKS 
+
+uses:
+- EKS, RDS, ALB, Route53, OIDC, IAM, EC2
+- To make the application publicly available, a application load balancer will be configured using k8s ingress resource
+- Sensitive info stored in k8s secrets, config details in config map
+- EKs managed node group- to delete: eksctl delete cluster --name j09-cluster --region us-east-1
+- To describe the vpc associated with the cluster: 
+    aws eks describe-cluster --name j09-cluster --region us-east-1 --query "cluster.resourcesVpcConfig.vpcId" --output text
+    #In bash, environment variables should be assigned without any spaces around the = sign.
+- to describe private subnets in that vpc:
+    PRIVATE_SUBNET_IDS=$(aws ec2 describe-subnets \
+  --filters "Name=vpc-id,Values=$VPC_ID" \
+  --query "Subnets[?MapPublicIpOnLaunch==\`false\`].SubnetId" \
+  --output text \
+  --region us-east-1)
+
+- Create a DB subnet group:
+  aws rds create-db-subnet-group \
+  --db-subnet-group-name j09-postgres-private-subnet-group \
+  --db-subnet-group-description "Private subnet group for J09 PostgreSQL RDS" \
+  --subnet-ids $PRIVATE_SUBNET_IDS \
+  --region us-east-1
+
+- Create security group for RDS:
+  aws ec2 create-security-group \
+  --group-name postgressg \
+  --description "SG for RDS" \
+  --vpc-id $VPC_ID \
+  --region us-east-1
+
+- To describe security group id of sg for RDS:
+  SG_ID=$(aws ec2 describe-security-groups \
+        --filters "Name=group-name,Values=postgressg" "Name=vpc-id,Values=$VPC_ID" \
+        --query "SecurityGroups[0].GroupId" \
+        --output text \
+        --region us-east-1)
+
+- To get the SG attached with cluster nodes:
+  NODE_SG=$(aws eks describe-cluster --name j09-cluster --region us-east-1 \
+  --query "cluster.resourcesVpcConfig.securityGroupIds[0]" --output text)
+
+- To Allow cluster to reach rds on port 5432
+aws ec2 authorize-security-group-ingress \
+--group-id $SG_ID \
+--protocol tcp \
+--port 5432 \
+--source-group $NODE_SG \
+--region us-east-1
+# We should only allow the cluster nodes to reach RDS on the port 5432. For security reasons, we should only open the ports from a particular security group instead of all (0.0.0.0/0)
+
+##tree . :to see entire file structure with all directories and files in them.
+
+- To Creating an PostgreSQL RDS instance(in pvt subnets) that can only be privately accessed:
+aws rds create-db-instance \
+--db-instance-identifier j09-postgres \
+--db-instance-class db.t3.small \
+--engine postgres \
+--engine-version 15 \
+--allocated-storage 20 \
+--master-username postgresadmin \
+--master-user-password YourStrongPassword123! \
+--db-subnet-group-name j09-postgres-private-subnet-group \
+--vpc-security-group-ids $SG_ID \
+--no-publicly-accessible \
+--backup-retention-period 7 \
+--multi-az \
+--storage-type gp2 \
+--region us-east-1
+
+RDS details:
+USERNAME: postgresadmin
+PASSWORD: YourStrongPassword123!
+DB_HOST: j09-postgres.cxka0gkwkr5j.us-east-1.rds.amazonaws.com (You can found this at rds instance endpoint config)
+DB_NAME: postgres (default db name if as we did not provide a custom db name)
+
+to update database url in secrets( base64 ):
+echo -n "DATABASE_URL: "postgresql://postgres:YourStrongPassword123!@devops-learning-db.<your-db-endpoint>.us-west-2.rds.amazonaws.com:5432/devops_learning"" | base64
+
+
+eksctl create cluster \
+  --name j09-cluster \
+  --region us-east-1 \
+  --version 1.31 \
+  --nodegroup-name standard-workers \
+  --node-type t3.medium \
+  --nodes 2 \
+  --nodes-min 1 \
+  --nodes-max 3 \
+  --managed
+
+export cluster_name=j09-cluster # no spaces around '='
+aws eks update-kubeconfig --name $cluster_name --region us-east-1
+
+VPC_ID=$(aws eks describe-cluster --name $cluster_name --region us-east-1 --query "cluster.resourcesVpcConfig.vpcId" --output text)
+
+
+cG9zdGdyZXNhZG1pbgo=
+
+WW91clN0cm9uZ1Bhc3N3b3JkMTIzIQo=
+
+cG9zdGdyZXNxbDovL3Bvc3RncmVzYWRtaW46WW91clN0cm9uZ1Bhc3N3b3JkMTIzIUBwb3N0Z3Jlcy1kYi4zLXRpZXItYXBwLWVrcy5zdmMuY2x1c3Rlci5sb2NhbDo1NDMyL3Bvc3RncmVzCg==
+
+ttlSecondsAfterFinished: 100
+
+
+ $ echo 'postgresql://postgresadmin:YourStrongPassword123!@postgres-db.3-tier-app-eks.svc.cluster.local:5432/postgres' | base64
+DATABASE_URL: "postgresql://postgres:<strong-password>@devops-learning-db.<your-db-endpoint>.us-west-2.rds.amazonaws.com:5432/devops_learning"

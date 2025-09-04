@@ -1,0 +1,189 @@
+EFK, ELK- used to collect, store and analyse logs in k8s clusters - why? debugging, auditing, performance assessment, security
+
+elastic search- stores and indexes logs for easy retrieval, attached to EBS vol to take backup or snapshot. can query this component.
+fluentBit or logstach- lightweight log forwarder collects logs from various sources, frwds to elasticsearch, deployed as daemon set on each node of k8s cluster.
+kibana- Visualization tool used to monitor and analyse logs stored in es.
+
+similar setup with prom and graf:
+In Prom:
+node exporter(like fluent bit)
+tsdb(time series database - store logs with timestamps)-like elastic search
+alert manager(to send alerts)
+
+Grafana(like Kibana) to visualize the data.
+
+✅ Fluent Bit
+Deployed as a DaemonSet on each node
+Reads logs (from containers or system)
+Forwards them to Logstash, Elasticsearch, or OpenSearch
+
+✅ Logstash
+Deployed as a central service
+Processes logs from Fluent Bit, Filebeat, Kafka, etc.
+Pushes enriched logs to Elasticsearch
+
+
+#basic stuff
+
+NAME                     READY   STATUS    RESTARTS   AGE
+elasticsearch-master-0   0/1     Running   0          65s
+Column	Meaning
+0/1	The pod has 1 container, but 0 are Ready (maybe still starting or failing probes)
+Running	The container is running, i.e. not in Pending or CrashLoopBackOff
+Ready	The container hasn’t passed its readiness probe yet
+
+elast user name: elastic
+elastic password: 6zfOzApSU4QhscjF
+
+Prompt Engineering Basics
+GEN AI tools Beginner
+
+
+Here's a universal, repeatable checklist that works both for:
+
+A hosted app (like your EC2 sample)
+
+Or a Kubernetes cluster
+
+ a full shell script to set up the EFK stack with a sample Node.js app on an Ubuntu EC2 instance from scratch.
+
+🟢 Run this as ubuntu user after logging into your EC2 instance.
+💡 Save it as setup-efk.sh, then chmod +x setup-efk.sh and run with ./setup-efk.sh.
+
+✅ setup-efk.sh
+
+#!/bin/bash
+
+set -e
+
+echo "🔧 Installing Docker & Docker Compose..."
+sudo apt update
+sudo apt install -y docker.io docker-compose
+sudo usermod -aG docker $USER
+
+echo "📦 Creating project directory: efk-stack"
+mkdir -p ~/efk-stack && cd ~/efk-stack
+
+echo "📝 Writing sample Node.js app..."
+cat <<EOF > app.js
+const express = require('express');
+const fs = require('fs');
+const app = express();
+const port = 3000;
+
+app.get('/', (req, res) => {
+  const log = \`Request received at \${new Date().toISOString()}\n\`;
+  fs.appendFileSync('/var/log/sample-app.log', log);
+  res.send('Hello from Sample App!');
+});
+
+app.listen(port, () => {
+  console.log(\`App listening at http://localhost:\${port}\`);
+});
+EOF
+
+echo "📄 Writing package.json..."
+cat <<EOF > package.json
+{
+  "name": "sample-app",
+  "version": "1.0.0",
+  "main": "app.js",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
+EOF
+
+echo "📁 Creating log file..."
+sudo touch /var/log/sample-app.log
+sudo chmod 666 /var/log/sample-app.log
+
+echo "📦 Installing Node.js dependencies..."
+npm install
+
+echo "📝 Writing Fluent Bit config..."
+cat <<EOF > fluent-bit.conf
+[SERVICE]
+    Flush        1
+    Daemon       Off
+    Log_Level    info
+
+[INPUT]
+    Name          tail
+    Path          /var/log/sample-app.log
+    Tag           app.log
+    DB            /fluent-bit/fluent-bit.db
+
+[OUTPUT]
+    Name  es
+    Match app.log
+    Host  elasticsearch
+    Port  9200
+    Index app-logs
+EOF
+
+echo "📦 Writing Docker Compose file..."
+cat <<EOF > docker-compose.yaml
+version: '3.7'
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.0
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+
+  fluentbit:
+    image: fluent/fluent-bit:1.8
+    container_name: fluentbit
+    volumes:
+      - ./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+      - /var/log/sample-app.log:/var/log/sample-app.log
+    depends_on:
+      - elasticsearch
+
+volumes:
+  esdata:
+EOF
+
+echo "🚀 Starting EFK stack..."
+docker-compose up -d
+
+echo "🚀 Starting sample app..."
+nohup node app.js > app.out 2>&1 &
+
+echo "✅ Done!"
+echo "🌍 Access your services:"
+echo "   🔹 Sample App:     http://<your-ec2-ip>:3000"
+echo "   🔹 Kibana (logs):  http://<your-ec2-ip>:5601"
+echo ""
+echo "📌 Go to Kibana → Management → Index Patterns → create 'app-logs*' with '@timestamp'"
+
+
+With k8s cluster:
+
+fluent bit sends logs(needs elastic search username and pswd for auth of fluent bit) to Elastic search(deployed as a stateful set, mounted with EBS volume)
+Es inside k8s and EBS outside - comms established by connecting service account of ES in k8s to EBS using an IAM role + EBS CSI driver which allows in talking to EBs and creating ebs volume and pvc 
+
+elastic
+KIAeoJzrERiJi5zA

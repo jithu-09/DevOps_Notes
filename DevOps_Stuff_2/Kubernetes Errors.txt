@@ -1,0 +1,142 @@
+Kubernetes Errors:   #kubectl quick reference page
+
+###Error from server (BadRequest): error when creating "deploy.yaml": Deployment in version "v1" cannot be handled as a Deployment: json: cannot unmarshal object into Go struct field NodeSelector.spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms of type []v1.NodeSelectorTerm
+-> these kinds of error usually mean that the indentation or the syntax is wrong
+
+ImagePullBackOff:
+-> Error pulling a container image
+  - Invalid name of/non-existent image 
+  - Pulling image from a private(secure) repo
+  # to use a private image, add imagepullsecrets: <secret that contains docker creds> in "spec" of deployment yaml
+  # to create secret: kubectl create secret docker-registry demo --docker-server=<your-registry-server> --docker-username=<your-name> --docker-password=<your-pword> --docker-email=<your-email> for docker hub(server, same always: https://index.docker.io/v1/)
+    kubectl create secret docker-registry  \
+  --docker-server=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com \
+  --docker-username=AWS \
+  --docker-password=$(aws ecr get-login-password) \
+  --namespace=default
+   for ECR
+
+The BackOff part indicates that Kubernetes will keep trying to pull the image. Kubernetes raises the delay between each attempt until it reaches a compiled-in limit, which is 300 seconds (5 minutes).
+
+first you see: ErrImagePull error -> k8s waits and try again with increasing delay(total 5mins) ContainerCreating again ErrImagepull(cycle repeats)-> then ImagePullBackoff error 
+
+
+CrashLoopBackOff:
+-> Pod getting crashes multiple times, in a loop => getting created but crashing(not enough mem, cpu resources) then starting again creating container and crashing again, this repeats #default nature of k8s is to restart if crashed.
+Backoff is same as backoff delay above.
+   - Due to config mistakes: incorrect env vars, svc ports, volumes ets.
+   - Error in liveness/readiness probes
+   - resource limits too low(mem, cpu)(most common reason)
+   - wrong cli args
+   - bugs or exceptions in appn
+
+flow: containercreating -> error -> OOMkilled(when resource limits too low) -> crashloopbackoff
+
+#Liveness probe: The kubelet uses this to verify if pod is healthy(using a script or parameters in liveness probe), if not it will restart the pod. ex periodSeconds: tells kubelet how freq it should check pods health
+#Readiness probe: The kubelet uses readiness probes to know when a container/pod is ready to start accept traffic.
+
+
+Errors with statefulset and persistent volumes:
+-> Pod has immediate unbound persistent volume claim - where you is creating a pod using statefulset but it's looking for a pv and not able to find it.(pvc is missing)
+=> if replica: 3 with satefulset 2&3 replicas will be created only after 1 is successfull and similarly 2 and 3
+
+[[ statefulset has a pvc -> pvc will have a storage class -> storage class talks to its provisioner -> provisioner creates pv ]]
+
+ if storage class in volumeclaim template in yaml file is ebs => it will fail in minikube(shld be standard) or other cloud providers
+
+to check the issue: use kubectl describe pod <podname>
+deleting statefulset doesn't delete pv sometimes => to be deleted explicitly
+
+to use an external provisioner/ use external storage class => using CSI(container storage interface) driver of the external storage class => it will create the pv or talk to the external provisoner to create the pv
+- download it onto the cluster in use.
+
+[[ statefulset has a pvc -> pvc will have a storage class -> Install CSI driver -> CSI driver talks to its provisioner -> provisioner creates pv ]]
+
+
+PODS not schedulable:
+#KinD: K8s inside Docker, cluster run in a container.
+create: kind create cluster --name jithu
+delete: kind delete cluster --name jithu
+-> Error you see is FailedScheduling- Warning  FailedScheduling  25s   default-scheduler  0/4 nodes are available: 1 node(s) had untolerated taint {node-role.kubernetes.io/control-plane: }, 3 node(s) didn't match Pod's node affinity/selector. preemption: 0/4 nodes are available: 4 Preemption is not helpful for scheduling.
+-> 'Node-selector': pod will only be scheduled on node with the same name as 'node-name'(hard-match, if not found don't schedule)
+    syntax:
+      spec:
+            nodeSelector:
+            node-name: arm-work
+   ex: nodeSelector:
+         node-name: arm-worker => pods will only be scheduled on nodes with name 'arm-worker'
+   change node name: kubectl edit node <node-name> - add 'node-name' in 'labels'
+   or use this: kubectl label nodes <your-node-name> disktype=ssd(key=value)
+   then pods status changes- pending -> ContainerCreating -> running
+   without this, k8s uses its own algo to schedule the pods
+-> 'Node-affinity': 
+    two types:
+      - requiredDuringSchedulingIgnoredDuringExecution(like node slector, similar error as above is no match found)
+      - preferredDuringSchedulingIgnoredDuringExecution:if found schedule it on it or else anywhere is fine
+    syntax:
+     spec:
+      affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchExpressions:
+          - key: disktype
+            operator: In
+            values:
+            - ssd  
+     and 
+       spec:
+ 	 affinity:
+  	  nodeAffinity:
+	      requiredDuringSchedulingIgnoredDuringExecution:
+ 	       nodeSelectorTerms:
+  	       - matchExpressions:
+     		 - key: disktype
+            	   operator: In
+                   values:
+            	   - ssd      
+
+->Taint and Toleration:
+  Taints are applied to nodes to repel certain pods. They allow nodes to refuse pods unless the pods have a matching toleration.
+  cmd to taint: kubectl taint nodes node1 disktype=ssd:NoSchedule(key=value:effect)
+  cmd to remove taint: kubectl taint nodes node1 disktype=ssd:NoSchedule-
+  types of taints: noschedule(complete non schedulable), noexecute(all nodes will be down), preferrednoschedule(perfomance issues in node, only schedule as lst resort)
+
+  ###control plane node already has a taint of noschedule, hence pods only scheduled on worker nodes
+
+  Tolerations are applied to pods. Tolerations allow the scheduler to schedule pods with matching taints. Tolerations allow scheduling but don't guarantee scheduling: the scheduler also evaluates other parameters as part of its function.
+ Taints and tolerations work together to ensure that pods are not scheduled onto inappropriate nodes. One or more taints are applied to a node; this marks that the node should not accept any pods that do not tolerate the taints.
+Ex: when upgrading a cluster, nodes are drained and made unschedulable, then upgraded.
+  
+
+Pod security access issue, fix with network policy:
+->Access btw pods in diff namespaces must be secured for security reasons(to deny unrestricted access to sensitive pods)
+  - done using Network policy in secure namespace i.e, the one where secure pods are present(may not work with local clusters, need to have network plugin enabled out of the box and a compatible container network interface like calico):
+    .> ingress- Inbound traffic(by default all inbound traffic is allowed) can block using pod selector, ip address(cidr block), namespace selector
+    .> egress- Outbound traffic(can restrict access to certain domains by providing them in egress) which ip address pod should be able to access(provide cidr block)
+
+
+
+Kubernetes Realtime challenges:
+
+->Resource allocation/sharing:
+  Allocation of resources to multiple teams
+  - Namespaces with resource quotas(limit set on namespace) else few services may consume more than req mem and cpu, other svcs may go into crashloopbackoff due to OOMkilled(out of memory killed) error
+    .> Teams should perform performance benchmarking to decide on resource quota(can be questioned by devops engineer)
+    .> Scale cluster if overall requirement increases
+  - Pods with resource limits: OOMkilled error is restricted(blast radius) to namespace from the entire cluster using resource quotas, to prevent that in a particular namespace we need resource limits   
+    #resource requests: min resources needed for the pod to run.
+    .> teams to perform performance benchmarking for each application/ microsvc. Resource limits will be set for them during deployment.
+
+# Even after these limits, if a pod is creating an issue and effecting other pods in namespace, devs are responsible for trouble shooting it. How devops engineers helps them here?(case below)  
+
+-> OOMKilled issues with pod:
+# crashloopbackoff- status due to error- OOMKilled
+ - As a devops engineer, you can share the thread dump and heap dump of the pod to the devs(this is how you help) for them to analyse them to find the root cause
+   varies from appn to appn - for java- use kill -3 for thread dump and jstack cmd for heap dump
+
+-> Upgrades:
+ - Detailed manual with steps to perform the upgrade(take backup, go through release notes, upgrade control plane first(start with etcd, upgrade kube api, scheduler versions), next work nodes(drain the nodes - to move pods on it to diff node and unschedule(taint or cordon) the node, disconnect and upgrade kubelet and install other packages required, then bought up, taints removed made schedulable again and process repeats for other nodes in the cluster), and then addons
+
+

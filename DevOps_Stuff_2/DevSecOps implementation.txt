@@ -1,0 +1,122 @@
+<<DevSecOps implementation>>
+
+-Devops with security mindset
+ex: using vault and remote backend with tf
+k8s with secrets, API, etcd etc
+
+-keeping AI assistant code in check using devsecops pipelines. Not just AI, but in general anyone.
+-Security standards(like preventing hardcoded secrets, prevent cyber attacks etc)
+-Sit with dev, understand app, it's requirements, tech stack before writing the cicd pipeline
+
+#.tsx-typescript code, "vite" is used to run the app locally
+# pip- installs dependencies from requirements.txt file
+# npm- installs dependencies from package.json file
+
+#Why copy and install dependencies first and then source code in docker i.e, separating dependencies from appn?
+-docker implements caching layers
+=>when dependencies copied and installed first followed by src code, docker caches a layer for the dependencies
+=>Next time when the build is run, it will not again download the dependencies from the internet but directly run the appn as there's a layer for dependencies already cached=> significantly improves build time
+
+# kubectl port-forward(in k8s), docker -p 9099(host port):80(container port) in docker : to forward port
+
+#pipeline flow:
+
+- dev commits to GitHub
+- GitHub workflows get triggered(GitHub actions workflow), it contains multiple jobs(stages as per Jenkins) which get run
+- unit test job
+- static code analysis job: checks for syntax, undeclared variables, uncalled functions, old or deprecated packages
+  does not automatically fix or remove them unless you integrate it with a tool that supports automatic fixes. it reports them(Generates  warnings or errors.)
+use tools like SonarQube: Detects issues and suggests fixes but does not remove code.
+- build job: npm build to build the application, get artifact, can be used to run locally
+- docker job: build(same as above build, here images used), scan(trivy), push(private image repo- artifactory, dockerhub, github container registry)
+- update yaml files with new image job: in deployment yamls  
+- push to manifests repo job: using a script maybe
+- cd tools like argoCD monitors the repo for new images
+- deploy to cluster job
+
+#github actions cic-cd workflow:
+
+name: ci-cd workflow #name of the workflow
+
+on: #tells on what action the workflow should be triggered
+  push:
+     branch: [main]
+     path-ignores:
+        - '<give file name here>' #updates here will not trigger the pipeline.
+  pull:
+     branch: [main]
+  workflow_dispatch: #to trigger manually
+
+jobs:
+    test: #"name" of the job, runner specified using "runs-on", steps in the job given as "steps:"
+       -
+       -
+       -
+    static-code scan:
+    build:
+    Docker:
+    update k8 yaml:
+    deploy to k8s cluster:
+
+this is basic structure
+
+example of a job:
+
+  test:
+    name: to run unit tests
+    runs-on: ubuntu-latest #runner, where the job runs, can use own or GitHub runners
+    needs: [job1, job2]  #to declare dependency on jobs 1&2
+    steps:
+     -name: code checkout
+      uses: actions/checkout@v4
+     -name: install nodejs
+      uses: actions/setup-node@v4
+      with: 
+        node-version: '20'
+        cache: 'npm' #to prevent downloading dependencies everytime
+    similary install dependencies and run test
+
+#for light weight cluster, use kind over minikube, why? very lightweight
+#port-forward can be done at pod level, deployment level or svc level
+
+For AMD64 / x86_64
+[ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.27.0/kind-linux-amd64
+# For ARM64
+[ $(uname -m) = aarch64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.27.0/kind-linux-arm64
+chmod +x ./kind
+sudo mv ./kind /usr/local/bin/kind
+
+install docker:
+ sudo apt update
+sudo apt install docker.io	
+sudo usermod -aG docker $USER
+sudo systemctl restart docker
+
+#create cluster: kind create cluster --name=devsecops-cluster
+
+#kubectl: 
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+#install argocd: kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+#access ui from ec2 instance: kubectl port-forward svc/argocd-server 9000:80 -n argocd --address 0.0.0.0
+#access appn :kubectl port-forward tic-tac-toe-795bcbc7f4-5tlq9 9098:80 --address 0.0.0.0 #port-frwd a pod
+#The --address flag in kubectl port-forward specifies the local network interface to bind to. Using 0.0.0.0 means the 
+service will be accessible from any network interface (i.e., any IP address on the machine), not just localhost
+
+#echo ksaidufoaifcc== | base64 --decode
+
+# if image pushed to public repo, directly updating repo details, folder name in source, selecting syn policy, cluster url, 
+namespace(default), we'll be able to deploy the app.
+#in case of private container registry, like ghcr, only people with access can do it, how? Add image pull secrets in 
+deployment.yaml(add username and pswd) => argocd can pull image from pvt cont reg
+run this:
+
+ubuntu@ip-172-31-24-2:~$ kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 -d
+Ix31xB-3jykGqRhlubuntu@ipkubectl create secret docker-registry github-container-registry \ainer-registry \
+  --docker-server=ghcr.io \ #ghcr pvt reg
+  --docker-username=jithu-09 \ #github username
+  --docker-password=<token> \ #github token added in repo
+  --docker-email=k.jithu2011@gmail.com #can give anything actually

@@ -1,0 +1,29 @@
+git rebase: commits added on top of main branch, linear history, cleaner but context maybe missing
+git merge: combines both the commits and creates a new commit, keeps the entire trck of commits in feature and main branch
+
+Before Rebase:
+main:    A---B---C
+feature:       D---E
+
+After Rebase:
+feature:    A---B---C---D'---E'
+
+Commits D and E are replayed on top of C, creating new commits D' and E'.
+
+Before Merge:
+main:    A---B---C
+feature:       D---E
+
+After Merge:
+main:    A---B---C---M
+               \     /
+                D---E
+A new merge commit M is created, combining the histories of both branches.
+
+git hooks: scripts in git workflow, to automate tasks, enforce policies etc
+client side hooks: run pre commit or post commit -> to run tests or update docs, send notifs
+Server side hooks: run pre receive or post receive -> to enforce branch policies or deploy code, interact with cicd
+
+GitHub webhoooks: used to send realtime data to web applications, ext services, works on push, pull or issue events
+ex: commit to a repo, if webhook configured to Jenkins -> a build will be triggered in Jenkins, pipeline will be run. If in GitHub actions, a pre configed workflow will be triggered
+

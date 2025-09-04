@@ -1,0 +1,25 @@
+event driven architecture:
+
+- cicd triggered based on push to GitHub(webhooks)
+- auto scaling based on load(ASG, replica sets)
+- Automated rollback during failures
+- infra monitoring and alerts
+
+Image pushed to artifactory or hub - can be used to deploy in all stages(dev, staging, prod)
+
+Can set the execution of stages based on environment using "when"
+
+sudo - regular user with temp elevated perm for few cmds
+root - highest privileges, no restrictions
+super- users with elevated privileges, synonymous to root user
+
+BRANCHING STRATERGY:
+
+Dev to staging: done in feature branch
+PreProd: done in release branch
+go live: from release branch and once everything is working as expected, merge to the main branch.
+bug fixes: hotfix branch from the release branch and then merge back
+
+some other follow:
+same till pre prod
+once verified, merged to main line and go live using master/main branch.

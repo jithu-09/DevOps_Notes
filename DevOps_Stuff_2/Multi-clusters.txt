@@ -1,0 +1,36 @@
+Multi-clusters
+
+Use Explicit Contexts for Safety: If you manage multiple clusters, you can explicitly specify the context when running commands:
+
+bash
+Copy code
+kubectl apply --context=eks-us -f deployment.yaml
+
+
+Use Namespaces to Segregate Resources: If you deploy to the same cluster frequently, consider using namespaces to isolate deployments:
+
+bash
+Copy code
+kubectl apply -n my-namespace -f deployment.yaml
+
+The error message you encountered, ARRDATAIllegalIPv4Address (Value is not a valid IPv4 address), indicates that you are trying to add an ELB DNS name (which is a hostname) instead of an IP address in your Route 53 record. Route 53 expects a valid IPv4 address for A records, but you are providing an ELB DNS name, which is correct for CNAME records but not for A records.
+
+Solution
+To fix this error, you need to create an Alias Record in Route 53 instead of an A record, because AWS allows aliasing to AWS resources (like ELBs) without using an IP address.
+
+Choose Hosted Zones:
+
+Select the hosted zone for your domain (e.g., example.com).
+Create a Record Set:
+
+Click on Create Record Set.
+Name: Leave it empty for the root domain (example.com) or specify a subdomain (app.example.com).
+Type: Select A - IPv4 address.
+Alias: Set to Yes.
+Alias Target: Select the ELB DNS name of your EKS service from the dropdown (e.g., a94e4e758564747408f9558a4688bf2d-664392977.eu-west-1.elb.amazonaws.com).
+Routing Policy: Choose Latency-based routing (or another routing policy, depending on your needs).
+Evaluate Target Health: Set this to Yes.
+Save the Record:
+
+Click on Create to save the alias record.
+

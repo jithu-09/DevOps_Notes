@@ -1,0 +1,96 @@
+hub-spoke model- argocd in one k8s cluster(High availability setup), this is used to rollout changes or deploy in other(spoke) clusters. Managing is easy.
+
+standalone- each cluster had separate argocd installation.
+
+why this not shell or ansible scripts?
+Can't identify changes made, can't rollback - can lead to issues in production env
+especially for CD
+
+for CI- GitHub or other source present .
+
+Gitops recommended for CD.
+Can make ARGOCD to revert manual changes based on manifests shared with it.
+Tracking, auditing, monitoring, revoking, auto-healing
+Git- single source of truth.
+
+changes to be made through GIT only.
+
+<opengitops.dev>
+
+*****When creating multiple clusters using eksctl - kubectl points to the cluster that is created at last.*****
+
+kubectl config get-contexts: all the clusters available
+kubectl config use-context <cluster you need>
+
+aws configure
+
+eksctl create cluster --name multi-cluster-1 --region us-east-1 
+
+kubectl config get-contexts(select the required cluster ie, hub cluster)
+
+kubectl config use-context Jitendra@multi-cluster-1.us-east-1.eksctl.io
+
+download argocd
+
+kubectl create namespace argocd	 
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+edit this cm: kubectl edit cm argocd-cmd-params-cm -n argocd
+
+add:
+
+data:
+    server.insecure: "true" # to run as http(insecure)
+
+edit svc: kubectl edit svc argocd-server -n argocd
+
+change from clusterIP to NodePort
+
+edit inbound rules of security group of the nodes, add the nodeport
+kubectl get nodes -o wide; to get pub ip => access argo cd through- <ext pub ip>:<nodeport>
+
+username: admin
+password: do this-
+
+kubectl edit secret argocd-initial-admin-secret -n argocd
+echo N1R6YlVXQzBIT3RabEc1dg== | base64 --decode
+
+to add other clusters to this cluster, do:
+->install argocd cli
+curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
+rm argocd-linux-amd64
+
+login to argocd: 
+argocd login <ext pub ip of node>:<nodeport>
+
+add cluster:
+argocd cluster add <cluster name from kubectl config get-contexts>
+
+Inside argocd console -> settings -> clusters:
+
+in-cluster => the cluster in which argocd is installed.
+
+here you can delete cluster but can't add cluster.
+
+in argocd console
+
+create an argocd application - this watches the git repo with the application manifests - any changes to the repo will be picked up by argocd and deployed to the cluster.
+
+in that-
+
+give app name
+
+title
+
+sync policy- automatic
+
+repo url
+
+path to manifests
+
+set destination cluster
+
+give namespace where app to be deployed
+
+-> argocd will monitor git repo and deploy application onto the cluster added.

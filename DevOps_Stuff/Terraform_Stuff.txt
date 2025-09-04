@@ -1,0 +1,53 @@
+Terraform
+
+ubuntu@ip-172-31-24-147:~$ vault read auth/approle/role/terraform/role-id
+Key        Value
+---        -----
+role_id    0957686e-239b-1c5a-a885-f43de2b8b0df
+ubuntu@ip-172-31-24-147:~$ vault write -f auth/approle/role/terraform/secret-id
+Key                   Value
+---                   -----
+secret_id             2aa75bc1-fb42-e66f-b49e-99d9a6fc6a00
+secret_id_accessor    a2422365-f5d5-b68f-58f6-3ef6097e8156
+secret_id_num_uses    40
+secret_id_ttl         10m
+
+
+to install:
+first configure aws cli: aws configure
+
+sudo apt update
+sudo apt install wget unzip -y
+wget https://releases.hashicorp.com/terraform/1.10.1/terraform_1.10.1_linux_amd64.zip
+unzip terraform_VERSION_linux_amd64.zip
+sudo mv terraform /usr/local/bin/
+
+
+to uninstall:
+
+sudo rm /usr/local/bin/terraform
+rm -f terraform_VERSION_linux_amd64.zip
+rm -f terraform
+rm -f ~/.terraformrc
+
+
+statefile deleted- take backup from previous version from remote backend(s3), check for local backup file(terraform.tfstate.backup) or maually import all the existing resources into tf
+
+provider- who provisions the resources based on tf api calls, provisioner- runs scripts post resource creation(local, file, remote)
+
+Never save secrets in tf files repo, tf files, or pass as env vars - all lead to storing in statefile
+Soln: Hashicorp vault- mention vault provider in the provider section(secrets manager in AWS)
+- reference secrets in vault using data block -> tf pulls them during terraform apply using the key value pair in data block
+
+Hashicorp Packer - open open-source tool used to create identical machine images for multiple cloud platforms from a single source template. Similar to AMI in AWS
+In creating golden(master) images - a pre-configured and fully functional snapshot of a system, such as a virtual machine, virtual desktop, or server, that is used as a template for deploying new instances.
+
+Can mention the type of image needed in JSON and pass to Packer, which will create various os images
+
+remote exec - executes a script in a remote resource after it's created. Requires connection and supports ssh and WinRM. ex: run a script after EC2 is created.
+
+validate a variable during plan time: using a validation block, includes a condition that validates the variable and an error message when the condition is not met.
+
+process gets hung after running apply, if you cancel it may corrupt state file what to do?
+NEw terminal -> terraform state pull(creates a local backup of statefile) -> stop the apply in perv terminal
+

@@ -1,0 +1,123 @@
+Python for DevOps # keywords, data types, operators, logical reasoning #interpreted lang, dynamically typed lang
+
+-py(adv ops- API integration, complex logic, reusable code etc) for Linux and windows, shell scripting(monitoring, env or 
+variable ops, system admin tasks, cli interaction) for only Linux
+
+- execute all py files in a dir: for i in $(ls | grep '\.py$'); do python "$i"; done 
+
+- ec2InstanceName : camel casing, ec2_instance_name: snake casing(coz of "_") 
+
+-funcs: readability, reusable, ease of debugging, use "return" statements in funcs instead of "print", a piece of logic
+
+-module: group of funcs
+
+- Can use Python files as modules: cal1.py to use in cal2.py do -> import cal1 as cal
+                                                   then call it -> cal # outputs based on funcs defs in cal1
+                                                particular func -> cal.add #here add is a func in cal1
+ 
+- Package: a collection of modules, py packages hub- PyPI: python package index, install using: pip install <package>, open source contribution
+#pip list: to see all the installed packages
+
+# Always setup a virtual env for py: <<python -m venv .venv>>(-m implies calling a module), then install packages and modules, creates a logical isolation for your projects on your machine
+- install venv: pip install virtualenv
+- python -m venv proj-abc # do ls -ltr to see the disk space for proj-abc,  same as python -m venv .venv
+  # just names of seperation proj-abc and .venv(this is convention to mark and hide the virtualenv dir)
+  source proj-abc/bin/activate or source .venv/bin/activate -> to activate and use this logical separation
+  deactivate - to come out of the env
+
+- input from cmd line: python reads as string
+# sys.argv is a list in Python, which contains the command-line arguments passed to the script.
+# sys.argv[0] is the name of the script itself.
+# sys.argv[1] is the first argument passed to the script. Similarly arg[2],[3] so on
+
+# same stuff in linux:
+ bash args.sh hello world > $0 first arg(hello), $1 2nd arg(world), $@ => all args as a list, $# => no of args(2 here)
+
+#inside program: use os module
+     (In shell)     
+     export name="jithu"
+     python script.py
+
+     (in script)
+     import os
+     print(os.getenv("name")) or name = os.getenv("name")
+
+#Action	                          Bash	                                  Python
+Set env var	                export name="jithu"	               os.environ["name"] = "jithu"
+Read env var	                    $name	                             os.environ["name"]
+Safe read with fallback	    echo ${name:-default}	             os.environ.get("name", "default")
+
+-  is: identity operator => a is b : gives true or false
+
+-tuple: immutable (), lists: mutable, []
+
+-Dictionaries: key value pairs
+my_dict = {'name': 'John', 'age': 25, 'city': 'New York'}
+
+#use "get" for safer navigation through dict
+response= my_dict.get(person, {}).get('age', 'person not found') => safer way incase the "person" doesn't exist, checks for dict person if not there gives empty dir {}
+if there, from the inner dict checks fro value og 'age', found gives value else says person not found
+in dict. my_dict[person].get('age', 'person not found') => will return error if key not found.
+
+#modify the dict
+my_dict['age'] = 26  # Modifying a value
+my_dict['occupation'] = 'Engineer'  # Adding a new key-value pair
+
+#delete entry
+del my_dict['age'] => key in ''
+
+#check key there
+if 'age' in my_dict:
+    print('Age is present in the dictionary')
+
+#iterate over it
+for key, value in my_dict.items():
+      print(key,value)
+
+- Set: unique elements only
+set1 = {1, 2, 3, 4}
+set2 = {3, 4, 5, 6}
+
+union_set = set1.union(set2)  # Union of sets
+intersection_set = set1.intersection(set2)  # Intersection of sets
+difference_set = set1.difference(set2)  # Difference of sets
+my_set.add(6)  # Adding an element
+my_set.remove(3)  # Removing an element
+is_subset = set1.issubset(set2)  # Checking if set1 is a subset of set2
+is_superset = set1.issuperset(set2)  # Checking if set1 is a superset of set2
+
+# f-string format
+name = "Alice"
+age = 30
+print(f"My name is {name} and I am {age} years old.") => same as print("My name is" + {name} + "and I am" + {age} + "years old.")
+
+Inside f"...":
+Anything inside {} gets evaluated from whatever is in current scope.
+
+Scope → means:
+Variables defined in same function
+Or globally if outside
+
+Limits of f-string scope?
+→ Only variables that exist where this print is written.
+def foo():
+    print(f"{random_var}")
+
+random_var = "hi"
+foo()
+Will give an error because random_var is outside the function.
+
+Unless you pass it:
+def foo(rand_var):                # Defines a function that takes one argument
+    print(f"{rand_var}")         # Prints the argument using an f-string
+
+random_vari = "hi"               # Assigns "hi" to the variable
+foo(random_vari)                 # Calls the function with that variable
+
+ or declare it global.
+
+-BOTO3: module used to create resources and interact with aws api
+better for quick action, and scripting than CFT, and terraform(will be tedious for simple steps)
+better than AWS cli, as it comes in handy when dealing with serverless compute, can't use cli for that pupose
+
+client = boto3.client('<resource>') => can interact with the 'resource' using 'client, refer boto3 docs for all ops.

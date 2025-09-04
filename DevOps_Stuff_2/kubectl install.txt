@@ -1,0 +1,13 @@
+kubectl install:
+
+curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
+chmod +x kubectl
+sudo mv kubectl /usr/local/bin/
+
+
+argocd by default listens on https port
+so to use port 80 and serve http then add:
+
+args:
+  - --insecure
+

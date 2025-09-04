@@ -1,0 +1,172 @@
+AWS,k8s&CLoud
+
+Don'ts on cloud:
+- Don't skip monitoring and logging
+- Don't manage everything manually
+- Don't allow public access to your DBs or apps
+- Don't neglect security updates for self-managed instances
+- Don't hardcode secrets or creds
+- Don't neglect IAM roles and policies
+- Don't forget about backups
+- Don't skip cost optimization
+- Don't stick to a single AZ or region
+	
+Use AWS Parameter Store:
+- For basic configs or less sensitive data
+- If you're cost-sensitive and don’t need auto-rotation
+
+Use AWS Secrets Manager:
+- For sensitive credentials (DB passwords, tokens)
+- If you want auto-rotation and better secret lifecycle management
+
+Metrics ASG can use for auto-scaling:
+- CPU util
+- memory(not default) needs custom metrics
+- custom metrics
+- disk I/O
+
+Decrease ASG's time to scale instances:
+- pre-baked AMI with all necessary s/w installed(reduces bootstrapping time, faster than installing via user data)
+- Keep min no.of a idle/warm pool, i.e., minimum no.of instances in stopped/pre-initialized state, as they can be assigned to the spike faster than launching new ones
+- Reduce cooldown time if workloads settle quickly
+
+Industry standard pipeline for build, package, and deploy in EKS cluster:
+- use to pipelines: for CI and CD -> safer, clearer, and easier to debug
+- CI: Triggered on push/ pull req
+    -> GitHub, GitLab or other VCS for source code storing
+    -> run unit tests/linting
+    -> Scan the image(if req) using Trivy
+    -> Push to ECR/ Docker hub
+- CD: Triggered on merge to main line or manual request
+    -> Pull the image from ECR/ Docker hub
+    -> update the manifest files
+    -> Deploy to cluster using Helm, ARGOCD or through Jenkins/ GitHub Actions
+    -> Promote through environments (dev → staging → prod)
+- Monitor the cluster using Prom + Grafana, ELK stack etc
+- Store secrets in AWS Secrets Manager 
+🚦 Why Not Just One Pipeline?
+    -> Security: You may want to restrict who can deploy vs who can build.
+    -> Speed: Devs can trigger just CI without waiting for deployment.
+    -> Environment Control: You may want to deploy to dev, staging, and prod at different times.
+
+RollBack in k8s: Kubernetes stores a revision history of your Deployments, it creates a new replica set.
+- List the versions of deployments: kubectl rollout history deployment <deployment-name>
+- Rollback to prev version: kubectl rollout undo deployment <deployment-name>
+- rollback to a specific version: kubectl rollout undo deployment <deployment-name> --to-revision=<n>
+
+🔄 What Happens Internally:
+- Kubernetes switches the active Replica Set to the previous one.
+- Old pods are recreated, and new (bad) pods are terminated.
+- Traffic is routed to the healthy pods (via Services).
+
+Kubernetes doesn't auto rollback by default, but:
+- You can build this into your CD pipeline.
+- Or use tools like Argo Rollouts 
+
+##Make sure your Deployment uses readiness probes and not just liveness probes — they help detect failed rollouts more safely.
+Industry preferred prod ways for rollback:
+🔄 1. GitOps-based Rollback (Industry Preferred)
+Tooling: ArgoCD or Flux
+Process:
+- Deployment manifests are version-controlled in Git.
+- Git is the source of truth.
+- To roll back: revert to a previous Git commit (with known good config/image tag).
+- ArgoCD detects the change and syncs the cluster accordingly.
+✅ Safe, auditable, and repeatable
+
+🚦 2. Rollback via CI/CD Pipelines
+Tooling: Jenkins, GitHub Actions, GitLab CI, etc.
+Process:
+- Deployment fails → monitoring/alerts (Datadog, Prometheus) trigger rollback step.
+- CI/CD system re-runs kubectl rollout undo or redeploys with a previous image tag.
+- Manual approval may be required before rollback to prod.
+✅ Controlled and allows alert-triggered auto rollback
+
+🧪 3. Canary or Blue-Green with Auto Rollback
+Tooling: Argo Rollouts, Flagger, Spinnaker
+Process:
+- Deploy to a small % of traffic (canary).
+- Run health checks or A/B test metrics.
+- If issues are detected:
+- Automatically shift traffic back
+- Revert to the previous ReplicaSet or manifest
+✅ Intelligent rollback based on live traffic metrics
+
+👨‍💼 4. Manual Rollback (for Critical Systems)
+Used when:
+- Auto rollback may cause other issues
+- Teams want full control due to risk
+Process:
+- Monitor after deploy (Prometheus, New Relic, ELK).
+- On an incident, engineer uses kubectl rollout undo or updates the manifest to the known good tag.
+- Change is pushed via Git or pipeline.
+✅ Safer but slower; used when auto rollback is risky
+
+
+IAM Roles for Service Accounts (IRSA) – Industry-standard way: 
+IRSA lets you securely give Kubernetes pods access to AWS services using IAM roles, without hardcoding credentials or using EC2 instance roles.
+- Enable OIDC on EKS: eksctl utils associate-iam-oidc-provider --cluster my-cluster --approve
+- Create IAM Role for the service account: 
+  {
+  "Effect": "Allow",
+  "Principal": {
+    "Federated": "arn:aws:iam::<ACCOUNT_ID>:oidc-provider/oidc.eks.<region>.amazonaws.com/id/<ID>"
+  },
+  "Action": "sts:AssumeRoleWithWebIdentity",
+  "Condition": {
+    "StringEquals": {
+      "oidc.eks.<region>.amazonaws.com/id/<ID>:sub": "system:serviceaccount:<namespace>:<serviceaccount-name>"
+    }
+  }
+}
+- Annotate K8s Service Account: 
+ apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: my-app-sa
+  namespace: default
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::<ACCOUNT_ID>:role/MyAppRole
+- Use that ServiceAccount in your Deployment:
+  spec:
+    serviceAccountName: my-app-sa
+
+Benefits of IRSA:
+- No long-lived credentials
+- Follows the least privilege
+- Works seamlessly with AWS SDKs
+
+How to expose both your frontend (website) and multiple APIs through a single load balancer, especially in Kubernetes or cloud-native setups:
+You configure your Load Balancer (LB) to:
+- Route based on path or hostname
+- Forward traffic to different services/pods inside your cluster (or backend servers)
+In Kubernetes (EKS example)
+Use an Ingress Controller like:
+- AWS ALB Ingress Controller (now AWS Load Balancer Controller)
+- NGINX Ingress Controller
+Deploy one ALB via Ingress
+Define rules in the Ingress resource:
+rules:
+  - http:
+      paths:
+        - path: /
+          backend: website-service
+        - path: /api/v1
+          backend: user-api-service
+        - path: /api/v2
+          backend: auth-api-service
+##With ALB, AWS handles the TLS termination, path routing, etc.
+For better performance and management, make sure to use DNS-based domain mapping with Route53 (optional but preferred).
+You can also add WAF, caching (CloudFront), or CDN in front of the LB.
+
+
+- When your S3 bucket contains user-sensitive data, and you want to share it securely only with the correct user, you should never expose the bucket or its contents publicly. Instead, you use pre-signed "GET/PUT" URLs or secure proxy mechanisms.
+- A pre-signed URL is a temporary, permission-scoped link to an S3 object. You generate it only for the user who should access that object.
+ -> Secure, short-lived, limited access, simple to use, no creds exposed
+## Blocking Public Access + IAM Role = Works Well for Internal Access
+## for ext user not suitable as: they don't have iam roles or aws creds nor can they access aws apis directly
+
+
+
+
+

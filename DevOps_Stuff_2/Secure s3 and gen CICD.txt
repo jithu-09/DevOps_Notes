@@ -1,0 +1,18 @@
+Secure s3:
+
+-IAM policies to restrict access
+-block public access
+
+quality and reliability of CI/CD pipelines:
+code quality- SonarQube
+trivy- image scan
+
+branching strategy used while committing code, approval is needed before pushing code to production
+deployment- canary, blue-green
+monitoring- prom&grafana, ELK
+
+general cicd pipeline:
+
+GitHub webhook -> git checkout -> static code analysis -> build app -> [create docker image -> scan the image -> push to image repo] -> update deployment repo -> cd stage, deploy the app(mostly on k8s cluster)
+
+helm charts for deployment, service, ingress etcetera

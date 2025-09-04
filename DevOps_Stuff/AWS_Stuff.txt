@@ -1,0 +1,58 @@
+AWS
+
+AWS DevOps- run using required user not root, store secrets in AWS Secrets, separate pipeline for different branches, outdated images, agent missing error
+
+aws opswork(like ansible), aws xray(end to end tracing for appn, collects data of req flows, identify bottlenecks)
+AWS CloudTrail (logs user activity and API calls for auditing, governance, risk mgmt. purposes)
+aws cloudformation(like terraform, json format, has stacks which can be reused)
+
+maintain different environments like dev stage and prod in AWS:
+->> I maintain Dev, Stage, and Prod environments in AWS by using separate VPCs or accounts, Infrastructure as Code like Terraform,
+and environment-specific configs through SSM or Secrets Manager. I manage access with IAM, automate deployments through CI/CD pipelines, and ensure monitoring, tagging, and cost tracking are handled separately for each environment.
+
+Alternatives to a Bastion Host for connecting to private subnet are:
+->>Systems Manager (SSM) Session Manager - No need to open SSH ports (port 22) or maintain bastion servers. Needs
+SSM agent installed, IAM role attached with SSM permissions and Internet access (via NAT or VPC endpoint).
+->>Set up a VPN (AWS Client VPN, OpenVPN, etc.) connecting your local machine to the VPC.(Gives you access inside vpc, can SSH directly to private instances.)
+->>(For enterprises) AWS Direct Connect can create a private dedicated network link from your data center to AWS VPC.
+###NAT Gateway = private instance → internet only (not the other way around, only outbound, no inbound traffic supported)
+
+Auto-scaling instances fail after launch during a traffic surge. how to handle?
+->>check ASG activity history(EC2 Console → Auto Scaling Groups → Activity history) and ASG health metrics
+- could be failed health checks, invalid AMI, AZ doesn't support the AMI, security group issues
+->> Check EC2 instance status checks
+->> Invalid AMI, or launch template config
+->> Issue with scaling policies or AZ could be out of resources(move to diff az or region)
+->> CloudTrail to check for any API-level issues or maybe IAM issues.
+->> CloudWatch to check system metrics like CPU, memory
+->> Review instance logs if you can SSH into one
+###Cloudwatch, by default, doesn't collect application logs; it only collects system metrics.
+-> for that, you need to install the CloudWatch agent on the instance, specify which logs to watch( agent config file, which CloudWatch log group(A Log Group(container, organizes log streams, can search by common name, easy to monitor, search and analyze) is like a folder for related logs, making it easier to manage and analyze them in CloudWatch.) to send to, and how frequently.
+
+
+Different typesof volumes(ebs) in aws:
+gp2, gp3- gen purpose
+io2/io2 block express - high perf workload(dbs)
+st1(throughput optimized hdd)- big data, streaming
+sc1(cold hdd)- infrq access, archival purpose, cheapest
+magnetic- very slow legacy vols
+
+Data encryption in AWS: 
+-> Transit- ssl certs
+   rest - use kms to use those keys for encryption
+-> client vs server encryption
+
+###Client-side encryption happens before sending data to AWS, while server-side encryption happens after AWS receives the data.
+
+✅ Client-side = More control, more responsibility, manage keys  - On the client's machine before data is sent to AWS, encrypted when being uploaded(transit)
+✅ Server-side = Easier, integrated into AWS services, AWS manages keys or optionally client can - On the AWS server after AWS receives the data, data is plain during upload(transist) encryption by AWS before storage 
+
+CS- you use your key to encryption a file and then send to s3
+SSE-s3: AWS handles keys and encryotion automatically
+SSE-KMS: AWS kMS to manage your keys
+SSE-C: Use your own keys at uploadtime 
+
+Connection Draining:
+
+IT is a feture of Elastic Load balancers where in the active connections will be completed before terminating or deregistering them, providing graceful shutdown and preventing any dropped requests.
+

@@ -1,0 +1,72 @@
+pod with pv and pvc:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-xfusion
+spec:
+  containers:
+  - name: container-xfusion
+    image: nginx:latest
+    ports:
+    - containerPort: 80
+    volumeMounts:
+      - mountPath: "/usr/share/nginx/html"  # Correct document root
+        name: pv-xfusion
+  volumes:
+    - name: pv-xfusion
+      persistentVolumeClaim:
+        claimName: pvc-xfusion
+
+
+pv:
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-xfusion
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 3Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  volumeMode: Filesystem
+  hostPath:
+    path: /mnt/sysops
+    type: DirectoryOrCreate
+
+Explanation of Key Configurations:
+name: pv-xfusion → Names the PersistentVolume.
+storageClassName: manual → Uses the manual storage class.
+capacity: 3Gi → Allocates 3 GiB of storage.
+accessModes: ReadWriteOnce → Allows only a single node to mount it.
+persistentVolumeReclaimPolicy: Retain → Ensures the data is not deleted when the PV is removed.
+volumeMode: Filesystem → Uses a filesystem instead of raw block storage.
+hostPath: /mnt/sysops → Maps the PV to the host machine's /mnt/sysops directory.
+type: DirectoryOrCreate → Ensures the directory is created if it does not exist.
+
+
+
+pvc:
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-xfusion
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: manual
+
+Explanation of Key Configurations:
+name: pvc-xfusion → Defines the PVC name.
+storageClassName: manual → Matches the storage class of your PersistentVolume (pv-xfusion).
+requests: storage: 1Gi → Requests 1 GiB of storage from the PV.
+accessModes: ReadWriteOnce → Allows only one node to mount it at a time.
+volumeMode: Filesystem → Uses a filesystem-based volume.

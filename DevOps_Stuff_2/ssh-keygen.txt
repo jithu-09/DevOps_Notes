@@ -1,0 +1,36 @@
+ssh-keygen -t rsa -b 4096 -f ~/.ssh/NewDevopsKey.pem
+ls -l ~/.ssh/NewDevopsKey.pem ~/.ssh/NewDevopsKey.pem.pub
+( try 600 also)
+chmod 400 ~/.ssh/NewDevopsKey.pem
+chmod 644 ~/.ssh/NewDevopsKey.pem.pub
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/NewDevopsKey.pem(above to done to store private key in mem, no need to enter paraphrase eachtime you authenticate using this key)-not needed for pub key as it is not sensitive and anyone can access it.
+ssh-copy-id -i ~/.ssh/NewDevopsKey.pem.pub -o Identityfile=~/.ssh/NewDevopsKey.pem ubuntu@54.226.148.205: add pub key
+
+if not working then, ec2 connect:
+
+inside instance
+
+nano  ~/.ssh/authorized_keys
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/authorized_keys
+
+/home/ubuntu/.ssh
+
+enable ssh from one instance to another, follow this example:(works if both have same pem file at creation)
+
+(on local machine or codespaces, outside the instance)
+scp -i ExtraKey.pem ExtraKey.pem ubuntu@34.230.2.120:~/
+(This ensures that ExtraKey.pem is copied to the home directory (~/) of the ubuntu user on instance A.)
+
+ssh -i ExtraKey.pem ubuntu@34.230.2.120
+(ssh into instance A)
+
+ls -l ExtraKey.pem
+(check file)
+
+chmod 400 ExtraKey.pem
+(Set permission)
+
+ssh -i ExtraKey.pem ubuntu@<Jenkins-Private-IP>
+(ssh to other instance using it's private ip, since both in same vpc, else use public ip)

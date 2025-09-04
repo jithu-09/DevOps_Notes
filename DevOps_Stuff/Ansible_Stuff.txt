@@ -1,0 +1,121 @@
+Ansible
+for ssh, icmp rule very important to enable ssh comms to instances. connecting over few ntwks may be problem as may not allow ssh.
+solve sh issue for passwordless auth: every restart gives a new public ip for instance, be careful, update inventory.ini, 
+
+inventory file:
+
+stapp02 ansible_host=172.16.238.11 ansible_user=steve ansible_password=Am3ric@  ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+~                                                             
+
+playbook:
+
+name: Steps for creating a file
+hosts: stapp02
+
+tasks:
+  - name: Create a file
+    file:
+      path: /tmp/file.txt
+      state: touch
+
+Ansible’s default config file is usually at: /etc/ansible/ansible.cfg
+add a sudo user: under [defaults] section, add:
+[defaults]
+remote_user = <username>
+
+
+If you're ever unsure about what a module supports, run:
+
+ansible-doc <module_name>
+For example:
+ansible-doc copy
+ansible-doc service
+ansible-doc shell
+ansible-doc file
+
+playbook to create file and set perms and owner of the file in resp app servers:
+---
+- name: Create /tmp/nfsshare.txt with correct permissions and ownership
+  hosts: appservers
+  become: yes
+  tasks:
+    - name: Create empty file /tmp/nfsshare.txt
+      file:
+        path: /tmp/nfsshare.txt
+        state: touch
+        mode: '0644'
+        owner: "{{ file_owner }}"
+        group: "{{ file_owner }}"
+  vars:
+    file_owner: "{{ hostvars[inventory_hostname]['ansible_user'] }}"
+
+
+Disable SSH host key checking globally:
+add this in ansible.cfg file-
+[defaults]
+host_key_checking = False
+
+
+use copy :
+
+- name: Copy Index.html to all app servers
+  hosts: stapp02
+  become: yes
+  tasks:
+    - name: Copy index.html to all servers
+      copy:
+        src: /usr/src/finance-t2q5/story-t2q5.txt
+        dest: /opt/finance-t2q5
+        remote_src: yes #if file is on target server(where you intend to do the action, ignore if on system you are working on)
+        mode: '0644' # to set file permission
+
+
+
+---
+- name: Create /opt/file-t4q6.txt with specific content
+  hosts: stapp01, stapp02, stapp03
+  become: true
+  tasks:
+    - name: Create file with specific content
+      copy:
+        content: "This file is created by Ansible!\n"
+        dest: /opt/file-t4q6.txt
+        mode: '0644'
+
+✅ It will:
+
+Create the file if it doesn’t exist
+
+Overwrite the file if it does exist
+
+Write the line:
+This file is created by Ansible! into the file
+
+<<<always check indentation>>
+
+find this out:
+
+a. The Jump host serves as our Ansible controller, and the Ansible playbooks will be executed through the thor user from the jump host.
+
+b. An inventory file, /home/thor/playbook/inventory-t3q2, is available on the jump host. Utilize this inventory file to perform an Ansible ping from the jump host to App Server 1 and ensure the successful execution of the ping command.
+ansible stapp01 -i inventory-t3q2 -m ping
+stapp01 | UNREACHABLE! => {
+    "changed": false,
+    "msg": "Invalid/incorrect password: Permission denied, please try again.",
+    "unreachable": true
+
+
+install package:
+
+---
+- name: Install zlib package on App Server 3
+  hosts: stapp03
+  become: true  # Ensure it runs with elevated privileges
+  tasks:
+    - name: Install zlib
+      package:
+        name: zlib
+        state: present
+
+
+

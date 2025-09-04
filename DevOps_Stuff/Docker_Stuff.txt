@@ -1,0 +1,85 @@
+docker
+
+Some advanced questions on docker asked to me in interviews:
+How to run multiple docker compose on same machine
+What is build context
+What is run context
+Flow of request when you type docker commands
+How to connect to different daemons on demand through same docker client
+Env vs Build arguments
+How to pass arguments to containers which do not get persisted in the containter after build stage
+How env is different than arg 
+What is —build-arg 
+What are docker buildx
+What is scratch image
+What is distroless image
+How do you mount a docker secret
+Restart policy in docker
+
+docker repo is an image with a specified tag, registry- col'n of repos
+
+docker logs of a container: docker container logs <container name>
+-> filter: docker container logs  --tail 200 <container name>
+
+if container deleted => logs will be lost(as cont is stateless)- to persist use external block storage
+if it's stopped, restarted => logs will not be removed
+
+if docker image is bigger:
+-> build time will be longer
+-> image download error or api rate limit
+-> application becomes bulkier
+
+Soln: Use alpine images, prefer multi-stage dockerfiles, lock package versions (so that unnecessary things won't be downloaded), remove package binaries after installation, and don't install packages that are not required.
+
+each layer is an image by itself
+each line in dockerfile is a layer => combine these and we get Docker image
+- usually cached so everything is not built the next time Dockerfile is run
+
+cmd(not fixed) and entrypoint(fixed, cant be mod) can be used to run default Linux cmds during container build time.
+
+alpine: lightweight, only req packages present
+from node:12-alpine - alpine image
+from node - pulls latest image
+
+Docker events:
+It streams low-level, real-time event logs from the Docker daemon; not just your container.
+
+Imagine this:
+Your container is restarting in PROD.
+But it works on your machine.
+
+your usual debugging ritual:
+👉 docker logs → nothing
+👉 docker inspect → static
+👉 docker exec → can't connect before it dies
+
+Now try this instead:
+docker events --filter container=<your_container_id>
+
+Output:
+2025-05-04T18:20:01Z container create ...
+2025-05-04T18:20:02Z container start ...
+2025-05-04T18:20:03Z container health_status: unhealthy ...
+2025-05-04T18:20:04Z container kill signal=SIGTERM
+2025-05-04T18:20:04Z container restart
+
+👉And boom.
+Healthcheck failed → container killed → Docker auto-restarted it.
+And your app logs?
+They don’t show that. Because the healthcheck is outside your main process.
+
+Bonus tips:
+- Scope timeframes:
+docker events --since 30m --until "2025-05-04T18:00:00"
+- Want structured output?
+docker events --format '{{json .}}'
+- Need a full system timeline during an outage? Just remove the filter:
+docker events
+
+You should use Grafana, Loki, Prometheus for observability? You can't debug:
+- OOM kills before metrics are scraped
+- Missed volume mounts
+- Broken init containers
+- Sidecars that silently crash and restart
+
+docker events sees it all. In real time.

@@ -1,0 +1,53 @@
+Issue pushing image to Docker hub
+-Repo permission, ntwk issue, image size too large so slower push, authentication issue, tag mismatch, encryption keys expiration etc
+
+Secure docker images
+- Use official base images, minimal image size, run as non root user, implement multi stage build, don't hardcode sensitive info use env variables, scan images for vulnerabilities, don't install unnecessary packages, network policies to restrict unwanted access and isolate container
+
+Components of trace
+- Trace ID(to corelate all related spans across diff svcs), timestamp, logs, service name, duration, span ID(single unit of work), tags
+
+Security for appn
+- Firewall, security groups, NAcls, 
+
+
+scenarios of cost opt
+- scripts to remove unused resources on AWS(no touch)
+-A high-traffic e-commerce website frequently retrieves product details from a database. 
+ or An API service provides data that doesn't change frequently, such as weather forecasts or stock prices.
+ or A web application needs to manage user sessions efficiently.
+Solution: Implement Amazon ElastiCache (Redis or Memcached) to cache product details. -> reduced db quires, improved performance, lower costs, faster response time, reduced compute load, caches session data
+
+-A media streaming service needs to deliver video content quickly. Solution: Use Amazon CloudFront with caching at edge locations
+ -> lower latency, lower bandwidth costs, improved user experience
+
+Cloud Cost Management:
+Right-Sizing Resources: Adjust cloud resources to match actual usage.
+Reserved Instances: Purchase reserved instances for predictable workloads.
+Auto-Scaling: Implement auto-scaling to handle variable workloads efficiently.
+
+Distributed system
+- not centralized(you can work independently and asynchronously)
+- fault tolerant(rollbacks)
+- Version control
+- Scalability
+- supports collaboration
+- Distributed development(branching and forking)
+
+Spot Instances: Use spot instances for non-critical workloads to save costs.
+Process Automation: Automate repetitive tasks.
+
+Code delivery rate increase- Tracking using DORA metrics, metrics in jira dashboard
+Reduction deployment time- Automated CICD, IAC, optimized tsting(automated testing, run parallel tests), parallel build, caching, monitoring, deployment stratergies(bluegree, canary), Automated approvals, RBAC, lightweight envs(test, stage), Documentation
+
+Artifctory- to store build executables/artifacts, if they are missing we cant build images and deploy latest changes, can version and store them in case of rollback
+
+trace source code in prod from artifacts in prod:
+using docker image tags, artifacts tags, metadata of docker images
+
+security in pipelines:
+unit testing, static code analysis, trivy scan for images, non root user in docker stage, allow req ports only 
+
+S3 lifecycle policies: moving data from one storage class to another to optimize costs.
+
+SSL termination can happen at multiple places based on archi: at AWS Load Balancer, API Gateway, Amazon CloudFront

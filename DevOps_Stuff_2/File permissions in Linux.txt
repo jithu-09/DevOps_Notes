@@ -1,0 +1,64 @@
+File permissions in Linux - comes out of the box, same permissions for all files, can be modified.
+chown, chmod - used to modify file permissions.
+
+Permissions in /tmp:
+- The /tmp directory typically has special permissions that allow any user to create and modify their own files, but not necessarily files created by other users.
+- Files in /tmp are often created with permissions that restrict other users from modifying or deleting them.
+
+file permission: -(1) rw-(2) rw-(3) rw-(4)
+1- tells if it is dir or file: - => file, d=> directory, s=> .sock file(vscode file)
+2- Tells permissions of the user
+3- of group that user belongs to(if any)
+4- of other users and groups in linux file system
+
+=> -rw-r----- => dev(user who created the file) has read & write perms, group(that dev belongs to, if any) has read perm, others(other users and groups in Linux file system) don't have any perms.
+
+--- => 3 characters represent => read write execute
+
+whoami => to find out the current user
+
+change perm using chmod:
+
+chmod u=rwx sample.sh => u imples user here, so user will have read write and execute perms to sample.sh
+chmod o=rwx sample.sh => o implies others here, so others will have read write and execute perms to sample.sh
+
+<<<chmod o= sample.sh>>>:
+This command sets the permissions for "others" to nothing (no permissions).(blank)
+After running this command, "others" will not be able to read, write, or execute the file sample.sh.
+Example: If the initial permissions were -rwxr-xr-x, after this command, they would be -rwxr-x---.
+
+<<<<chmod o=rw sample.sh>>>>:
+This command sets the permissions for "others" to read and write.
+After running this command, "others" will be able to read and write the file sample.sh, but not execute it.
+Example: If the initial permissions were -rwxr-xr-x, after this command, they would be -rwxr-xrw-.
+
+<<<<chmod o=rwx sample.sh>>>>:
+This command sets the permissions for "others" to read, write, and execute.
+After running this command, "others" will be able to read, write, and execute the file sample.sh.
+Example: If the initial permissions were -rwxr-xr-x, after this command, they would be -rwxr-xrwx.
+
+Same holds for 'u' or 'g' inplace of 'o'
+
+can club the perms in sinle cmd as : chmod u=rw,o=r,g=wx sample.txt, order of u, o, g doesn't matter, should be given w.o space, separated by commas.
+Owner (u): read, write (rw-)
+Group (g): write, execute (wx)
+Others (o): read, execute (rx)
+
+interms of numbers => 7 = rwx, 6 = rw, 4 = r
+
+4= read, 2= write, 1= execute
+
+so use accordingly, chmod 777 smaple.txt => 1st 7 for user 2nd for Group 3rd for others
+7 gives all perm as 7= 4+2+1
+6 read write as 6= 4+2
+only read 4
+only write 2
+only execute 1
+
+- Change ownership of a file: chown qe:qe test.sh => qe is the user to whom you want to shift the ownsership to.
+should be done through root user
+
+- A file is inside a folder => user must have req perm to access the folder as well a part from access to file, having only one of them is not enough
+Analogy - locker(file) in a bank(folder), can access locker(file) only if you can enter the bank(folder) 
+        - If don't have access to the locker(file) then you may get inside the bank(folder) but cnat acess the locker(file)
+

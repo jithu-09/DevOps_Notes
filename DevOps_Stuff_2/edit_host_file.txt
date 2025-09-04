@@ -1,0 +1,25 @@
+To edit the hosts file in your local Windows terminal, follow these steps:(edit hosts dns in local windows terminal)
+
+1. Open Command Prompt as Administrator
+Press Win + S, type cmd, then right-click and select Run as administrator.
+
+2. Open the Hosts File in Notepad
+Run the following command in Command Prompt (Admin):
+notepad C:\Windows\System32\drivers\etc\hosts
+This will open the hosts file in Notepad with admin privileges.
+
+3. Edit the Hosts File
+Add a new entry in the format:
+192.168.1.100   mycustomdomain.com
+Replace 192.168.1.100 with your desired IP address.
+Replace mycustomdomain.com with the domain you want to map.
+
+4. Save and Exit
+Press Ctrl + S to save.
+Close Notepad.
+
+5. Flush DNS Cache (Optional)
+Run the following command to clear the DNS cache:
+ipconfig /flushdns
+
+Now, when you access mycustomdomain.com in your browser, it will resolve to the specified IP! 🚀

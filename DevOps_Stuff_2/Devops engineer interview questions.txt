@@ -1,0 +1,72 @@
+Devops engineer interview questions for 3-4 years experienced professionals 
+
+1. Docker
+
+>What is the difference between an image and a container?
+
+>How do you create a Dockerfile, and what are some best practices?
+
+>Explain the purpose of Docker Compose and provide a use case.
+
+>How do you manage persistent storage in Docker?
+
+>What is a multi-stage build in Docker, and why is it used?
+
+>How do you troubleshoot a failing Docker container?
+
+2. Kubernetes
+
+>What are Pods in Kubernetes, and how are they different from containers?
+
+>Explain the difference between Deployment, StatefulSet, and DaemonSet.
+
+>How does Kubernetes handle load balancing between pods?
+
+>What is the purpose of ConfigMaps and Secrets?
+
+>How do you manage Kubernetes cluster scaling?
+
+>What is a Service Mesh, and how does it integrate with Kubernetes?
+
+3. Terraform
+
+>What is the difference between Terraform and other IaC tools like CloudFormation?
+
+>How do you manage state files in Terraform?
+
+>Explain the use of modules in Terraform and their importance.
+
+>What are workspaces in Terraform, and how do you use them?
+
+>How do you handle resource dependencies in Terraform?
+
+>Share an example of resolving a merge conflict in a Terraform project.
+
+4. Ansible
+
+>What is the difference between ad-hoc commands and playbooks in Ansible?
+
+>How do you ensure idempotency in Ansible playbooks?
+
+>What are Ansible roles, and how do you structure them?
+
+>How do you securely store sensitive data like passwords in Ansible?
+
+>Explain the difference between ansible-playbook and ansible-pull.
+
+>How do you troubleshoot an Ansible run that fails midway?
+
+
+5. Jenkins
+
+>What are the different types of Jenkins pipelines, and when would you use each?
+
+>How do you set up Jenkins agents and manage their configurations?
+
+>Explain how you integrate Jenkins with Git for CI/CD workflows.
+
+>What are some best practices for managing Jenkins plugins?
+
+>How do you implement a pipeline to deploy applications to Kubernetes or cloud services?
+
+>How do you secure Jenkins and its credentials?

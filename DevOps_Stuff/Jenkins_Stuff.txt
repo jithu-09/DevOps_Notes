@@ -1,0 +1,64 @@
+Jenkins
+
+practical jenkins errors
+- permission denied(chmod +x for script missing)
+- invalid git creds(check in manage creds)
+- docker command not found(install docker agent first)
+- error: cant find java maven(invalid path, global tools config missing)
+- out of memory(too many parallel processes, not enough ram)
+
+Jenkins errors: agent not found, version mismatch, plugin missing
+
+default Jenkins home directory: /var/lib/jenkins
+
+manage Jenkins -> config system -> home directory
+or echo $JENKINS_HOME
+
+automate build triggers:
+poll scm - checks source code regularly for changes
+GitHub webhooks:
+
+Trigger builds immediately when code is pushed.
+Configure webhook in your Git repo settings (pointing to http://<jenkins-url>/github-webhook/)
+In Jenkins job:
+"Build Triggers" → "GitHub hook trigger for GITScm polling"
+
+Schedules jobs at fixed times regardless of SCM changes.
+Use a curl command or script to trigger the job manually or from another system.
+
+Jenkins backup- though a plugin, create a folder to move the contents, stop Jenkins during backup(opt but safer)
+
+ThinBackup Plugin (for Freestyle & basic pipeline jobs): Automatic scheduled backups and easy restore.
+SCM Sync Configuration Plugin (syncs job configs with Git)
+
+Jenkins security
+authentication(through sso login/ github)
+authorization(rolebased strategy plugin, project-matrix auth to allow access based on their role)
+Audit trail plugin(to track user activity)
+creds mgmt(creds plugin like aws credentials)
+CSRF protection(enabled by default (manage jenkins -> global security, prevents cross-site request forgery attacks)
+HTTPS config- run direclty with https
+
+
+config Jenkins build to fail based on a specific word or phrase in the console output:
+
+Install "Text Finder Plugin" from Jenkins Plugin Manager.
+Add "Scan Console Output" under Post-build Actions.
+Enter keyword or regex in regular expression field, e.g., ERROR or FATAL (
+Check "Also check console output."
+Check "Mark build as failed" if the pattern is found
+)
+Check "Mark build as failed" if the pattern is found.
+For pipelines, use Groovy to scan log and error() out.
+
+
+<<MAVEN>>
+Pom.xml: contains versions, dependencies, and plugins required for the app
+transitive dependency: a->b b>c => a->b,c
+local repo, remote repo
+maven artifact- package with all the dependencies
+
+
+
+
+

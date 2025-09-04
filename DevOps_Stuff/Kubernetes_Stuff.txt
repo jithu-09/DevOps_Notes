@@ -1,0 +1,108 @@
+Kubernetes
+
+kops- Automation tool used to spin up a small test/dev cluster without using kudeadmin(have to integrate all ext svc like ebs, ec2, asg route53 while using this) -> all of this taken care by kops
+
+small prod-grade, high avail cluster - create, destroy, maintain, upgrade and setup of cloud infra taken care by kops
+
+replication controller - responsible for maintaining specified replicas across the cluster
+for high availability and horizontal pod scaling
+
+Pv- persistent volume(can exist independently without attached to a pod), pvc - persistent volume claim
+pod has pvc -> talks to cluster with the volume -> pv will be attached to the container
+
+pod not able to access a vol: can be the vol attached to a diff pod and is readwriteonce(EBS) 
+create a seperate vol using pvc in the deployment yaml or make the vol reasdwritemany(NFS)
+
+side car container: Container helps app to do some common tasks like logging, stores logs and sends to a central hub, removes complexities in the app, improves flexibility
+
+pods to be deployed only on specific nodes, nodes must only be used for these pods
+=> using taint- add taint to node(label it), give tht info in deployment yaml of pod => scheduler will provision pods in node 3 since 
+they have the taint(label req for node 3)
+
+if other app tries to deploy pod in it, they will be repelled by node 3
+
+
+scheduler- resp for scheduling diff pods on worker nodes
+how does it know it can schedule there?
+- nodes keep sending their metadata to it, including current load, health etc
+(The Kubelet, not liveness probes, sends node metadata used by the scheduler - it sends status update like resource availability, 
+pods status(healthy or not), node conditions, health info etc. to api server(which gets stored in etcd) and scheduler queries data 
+from api server to decide on where to place the pods)
+- based on this scheduler filters and scores the nodes to assess the healthy ones
+- pods go through pod scheduling cycle: based on its requirements to run, scheduler matches it with the node that can handle the pod and schedules it on that node.
+
+to move pods from one node to other based on node util: eviction of pods
+
+- this is set at node level not pod, done using kubelet: eviction-hard, eviction-soft
+- which one to evicte is based on internal algo, use quality of service classification of pods
+- pod selected will be gracefully terminated based on config, if not forcefully terminated
+- once done resource utilized by pod will be reclaimed by node
+
+Imagepull policy-  defines when the container image should be pulled from the registry. This ensures that the correct image is used in your pods, depending on the policy you set.
+
+The Image Pull Policy defines when to pull the container image: Always- pull the image for each start(even if present on node), IfNotPresent- for when the image isn’t locally available, and Never- to prevent pulling and always use the local copy.
+
+
+load balancers(One ip for ext world to access app - expose Kubernetes services externally.) vs ingress(more like a receptionist inside
+k8s cluster -intelligent reverse proxy, routes traffic to node/pod based on URL/path/host) - based on budget
+- external traffic routing, simple app(1 svc): LB
+- internal routing btw services: ingress
+- complex app: ingress behind LB
+
+(scenario of only load balancer - svc directly exposed, external IP of LB directly forwards traffic to the associated pod(s) behind
+the Service.)
+
+(scenario of Load balancer + ingress - svcs not extly exposed, only ingress controller svc exposed to ext world)
+Internet
+   ↓
+Load Balancer (Cloud Provider)
+   ↓
+Ingress Controller (K8s NGINX / Traefik / Istio)
+   ↓
+K8s Services & Pods
+
+[Client - internet] 
+   ↓
+[Cloud Load Balancer]  →  [Service: Ingress Controller (type=LoadBalancer)]
+                                  ↓
+                         [Ingress Rules]
+                                  ↓
+           ┌──────────────┬───────────────┐
+           ↓              ↓               ↓
+     [Service-A]     [Service-B]     [Service-C]
+     (ClusterIP)     (ClusterIP)     (ClusterIP)
+
+
+What challenges do you face in deploying CI/CD Pipeline across a multicloud environment.
+-Multi-cloud CI/CD = Extra complexity in networking, security, IAM, tooling, monitoring, cost & governance.
+Solution? → Cloud-agnostic tooling + automation + IaC + centralized observability.
+→ Code → Git → CI Pipeline → Build Artifact → Push to Universal Repo → Deploy via GitOps → Multi-cloud Clusters
+
+#svc type loadBalancer vs Ingress
+- LB: Best for simple, direct access to a single service (e.g., a backend API or frontend app).
+  -Each service needs its own load balancer (can be costly). Limited routing capabilities (no path-based or host-based routing).
+
+- smart router that manages external access to multiple services using a single(central) entry point. Ideal for web applications with multiple services (e.g., /api, /shop, /admin) - Multi-tenant setups
+  - Path-based and host-based routing, SSL termination and TLS support. Cost-effective, more complex to configure, needs ingress controller.
+
+#path-based : both Delegates path matching logic to the Ingress Controller
+ - prefix: Matches all paths that start with the specified path( /api, /api/v1, /api/users) - most common and predictable
+ - Exact: Matches the path exactly as specified(If you define /api with pathType: Exact, it matches: /api
+Does not match /api/v1 or /api/users - no subpaths only specific path)
+ - custom: Behavior depends on the Ingress Controller (e.g., NGINX might treat it like Prefix).
+
+Helm
+
+Helm v3 introduces a lot of changes that are not backwards compatible with Helm v2. 
+version- v3.17.0
+
+use? packages all k8s files into a single format called helm chart which will help in deployment, rollback, update, multiple env setup(dev,stg,prod) by changing values in values.yaml
+- uses three key files in a Helm chart: chart.yaml- Chart metadata, values.yaml- Default config values, templates/- K8s manifests as
+templates
+
+charts are easy to create, version, share publish
+
+helm repo: a common place to store helm charts, accessed via our deployment.
+-> maintain version as well for easier rollback, upgrade, etc
+-> eg: s3, cloudsmith, jfrog artifactory, google cloud storage, artifact hub(open source)
+

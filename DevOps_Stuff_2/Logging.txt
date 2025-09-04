@@ -1,0 +1,27 @@
+Logging(except msg, all are structured fields)
+-timestamp: when(date and time)
+-Source:instance of app(only applicable when deployed to cloud)
+-log level: importance the app gives to this log
+-node: component of the app that generated this log
+-log message: message
+
+in console: timestamp+lognode+message
+
+log level severity: Critical(triggers email), error, warning, info, trace(most detailed, ideal for prod), debug
+Thumb rule: log level-info for noraml operations, trace/debug while fixing a bug/issue.
+imp nodes: microflow engines, connection bus(interaction btw app and db), rest_publish and rest_consume.
+
+console>advance>set log levels(only visible when app is running)
+
+Most messages that you will see at the Info log level can be categorized as “business as usual”. Your application is just reporting what is going on, but in a very detailed way.
+
+A stack trace will always have an Exception
+
+Determining when your application should log and what information it should contain is an important decision you have to make as a developer.
+
+Critical: Something went horribly wrong and the application has shut down.
+Error: The application was unable to successfully perform an action but was able to recover.
+Warning: Something unexpected happened that requires investigation but the application can continue operating normally.
+Info: The application performed an action that’s worth monitoring.
+Debug: Information that can help with diagnostics. 
+Trace: Information detailing each step taken by your app.

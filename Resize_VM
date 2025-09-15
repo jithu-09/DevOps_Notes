@@ -1,0 +1,12 @@
+Steps to resize VM:
+
+- Increase the size of volume attached to VM
+
+- Install cloud-guest-utils
+  sudo apt install cloud-guest-utils
+
+- grow the partition size( #lsblk: to check blocks/partitions sizes )
+  sudo growpart /dev/xvda 1
+
+- resize the filesystem
+  sudo resize2fs /dev/xvda1
